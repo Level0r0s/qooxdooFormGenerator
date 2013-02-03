@@ -19,8 +19,6 @@ qx.Class.define("formgenerator.FormGenerator",
 
       this._add(child, {row: 0, column: i});
 
-      console.log(options[i].elements);
-
       var row = 0;
 
       //если есть заголовок, создадим его
@@ -33,12 +31,40 @@ qx.Class.define("formgenerator.FormGenerator",
         row++;
       }
 
-      var element = null;
       for (var j = 0; j < options[i].elements.length; j++) {
-        var element = this._createElement(options[i].elements[j]);
-        var label   = new qx.ui.basic.Label(options[i].elements[j].label);
-        child.add(label, {row: row, column: 0});
-        child.add(element, {row: row, column: 1});
+        var currentOption = options[i].elements[j];
+        //если есть label в свойствах
+        if (currentOption.label) {
+          //указан ли label через объект, или нет
+          if (currentOption.label.name) {
+            var labelName = currentOption.label.name;
+          } else {
+            if (typeof currentOption.label == "string") {
+              var labelName = currentOption.label;
+            } else {
+              var labelName = "none";
+            }
+          }
+
+          if (labelName != "none") {
+            var label   = new qx.ui.basic.Label(labelName);
+            //если есть option, установим их для label
+            if (currentOption.label.options) {
+              label.set(currentOption.label.options);
+            }
+            child.add(label, {row: row, column: 0});
+          }
+        }
+
+
+        //если есть свойство element  попробуем добавить элемент
+        if (currentOption.element) {
+          var element = this._createElement(currentOption.element);
+          if (element != "empty") {
+            child.add(element, {row: row, column: 1});
+          }
+        }
+
         row++;
       }
     }
@@ -49,8 +75,22 @@ qx.Class.define("formgenerator.FormGenerator",
   },
   members: {
     _createElement: function(options) {
+      //определим тип элемента
+      if (options.type) {
+        var type = options.type;
+      }
+      else {
+        if (typeof options == "string") {
+          var type = options;
+        }
+      }
+      //елси не получилось определить тип, возвращаем "пусто" (может стоит в этой функции использовать как то исключения, не знаю, потом посмотреть)
+      if (!type) {
+        return "empty";
+      }
+
       var element = null;
-      switch (options.type) {
+      switch (type) {
         case "textfield":
           element = this._createTextField();
           break;
@@ -58,7 +98,25 @@ qx.Class.define("formgenerator.FormGenerator",
           element = this._createTextArea();
           break;
         case "radiobuttongroup":
-          element = this._createRadioButtonGroup(options.data);
+          //радиогруппа требует data
+          //проведем проверку, что options.data, если существует - то это массив
+
+          //лучше проверить не через instanceof все таки, а одолжив toString метод
+          //if (options.data && options.data instanceof Array && options.data.length) {
+          //  element = this._createRadioButtonGroup(options.data);
+          //}
+
+          var toClass = {}.toString;
+          if (options.data && toClass.call(options.data) == "[object Array]" && options.data.length) {
+            element = this._createRadioButtonGroup(options.data);
+          }
+          else {
+            element = "empty";
+          }
+          break;
+        default:
+          //если не получилось определить тип - возвращаем пусто
+          element = "empty";
           break;
       }
       return element;

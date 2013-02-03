@@ -83,46 +83,41 @@ qx.Class.define("formgenerator.Application",
             name: "First column",
             elements:
             [{
-              type:  "textfield",
-              label: "Name",
-              labelPosition: "top"
+              element: "textfield"//label нет, так же "плохо" определенный тип элемента (но элемент все равно создастся)
             }, {
-              type: "radiobuttongroup",
-              label: "Gender",
-              labelPosition: "left",
-              data: ["Male", "Female"]
+              element: {type: "radiobuttongroup", data: ["Male", "Female"]},
+              label:   {name: "Gender", position: "left"}
             }, {
-              type:  "textfield",
-              label: "Last Name",
-              labelPosition: "left"
+              element: {type: "textfield"},
+              label:   {name: "Last Name", position: "top"}
             }, {
-              type:  "textfield",
-              label: "Country",
-              labelPosition: "left"
+              element: {type: "textfield"},
+              label:   "Country"//"плохо" определенный label
             }, {
-              type:  "textfield",
-              label: "City",
-              labelPosition: "left"
+              element: {type: "textfield"},
+              label:   {name: "<b>City</b>", options: {textColor: "red", rich: true}}//label с options
+            }, {
+              element: {type: "abracadabra"},//элемент с неизвестным типом, не создастся
+              label:   {name: "simple label"}
+            }, {
+              element: {type: "textfield"},
+              label:   {name111: "fff"}//неправильный label, с непонятным свойством
+            }, {
+              element: {type: "radiobuttongroup", data: {}},//радиогруппа с неправильным свойством data не отобразится
+              label:   "wrong radiogroup"
             }]
-          },
+          }/*,
           {
             name: "Second column",
             elements:
             [{
               type:  "textfield",
-              label: "Additional information",
-              labelPosition: "left"
+              label: "Additional information"
             }, {
               type:  "textarea",
-              label: "Bio",
-              labelPosition: "left"
-            }/*, {
-              type: "singleselection",
-              label: "single",
-              labelPosition: "left",
-              data: listData
-            }*/]
-          }
+              label: "Bio"
+            }]
+          }*/
         ];
 
       var formGenerator = new formgenerator.FormGenerator(formProperties);
