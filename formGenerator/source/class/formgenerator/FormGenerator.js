@@ -46,11 +46,11 @@ qx.Class.define("formgenerator.FormGenerator",
             if (typeof currentOption.label == "string") {
               var labelName = currentOption.label;
             } else {
-              var labelName = "none";
+              var labelName = null;
             }
           }
 
-          if (labelName != "none") {
+          if (labelName != null) {
             var label   = new qx.ui.basic.Label(labelName);
             //если есть option, установим их для label
             if (currentOption.label.options) {
@@ -61,17 +61,22 @@ qx.Class.define("formgenerator.FormGenerator",
               row++;
             }
           }
+        } else {
+          var labelName = null;
         }
 
         //если есть свойство element  попробуем добавить элемент
         if (currentOption.element) {
-          var element = this._createElement(currentOption.element);
-          if (element != "empty") {
-            if (topPosition) {
-              child.add(element, {row: row, column: 0});
-            }
-            else {
-              child.add(element, {row: row, column: 1});
+          //если есть имя label или указан propertyName, то создаем элемент
+          if (labelName != null || currentOption.element.propertyName) {
+            var element = this._createElement(currentOption.element);
+            if (element != null) {
+              if (topPosition) {
+                child.add(element, {row: row, column: 0});
+              }
+              else {
+                child.add(element, {row: row, column: 1});
+              }
             }
           }
         }
@@ -95,9 +100,9 @@ qx.Class.define("formgenerator.FormGenerator",
           var type = options;
         }
       }
-      //елси не получилось определить тип, возвращаем "пусто" (может стоит в этой функции использовать как то исключения, не знаю, потом посмотреть)
+      //елси не получилось определить тип, возвращаем null (может стоит в этой функции использовать как то исключения, не знаю, потом посмотреть)
       if (!type) {
-        return "empty";
+        return null;
       }
 
       var element = null;
@@ -122,12 +127,12 @@ qx.Class.define("formgenerator.FormGenerator",
             element = this._createRadioButtonGroup(options.data);
           }
           else {
-            element = "empty";
+            element = null;
           }
           break;
         default:
           //если не получилось определить тип - возвращаем пусто
-          element = "empty";
+          element = null;
           break;
       }
       return element;
