@@ -126,9 +126,6 @@ qx.Class.define("formgenerator.FormGenerator",
           if (options.data && toClass.call(options.data) == "[object Array]" && options.data.length) {
             element = this._createRadioButtonGroup(options.data);
           }
-          else {
-            element = null;
-          }
           break;
         default:
           //если не получилось определить тип - возвращаем пусто
