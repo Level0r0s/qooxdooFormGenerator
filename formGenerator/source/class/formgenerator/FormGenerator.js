@@ -33,6 +33,10 @@ qx.Class.define("formgenerator.FormGenerator",
 
       for (var j = 0; j < options[i].elements.length; j++) {
         var currentOption = options[i].elements[j];
+
+        //позиция label top, (если есть)
+        var topPosition   = currentOption.label && currentOption.label.position && currentOption.label.position == "top";
+
         //если есть label в свойствах
         if (currentOption.label) {
           //указан ли label через объект, или нет
@@ -53,7 +57,7 @@ qx.Class.define("formgenerator.FormGenerator",
               label.set(currentOption.label.options);
             }
             child.add(label, {row: row, column: 0});
-            if (currentOption.label.position && currentOption.label.position == "top") {
+            if (topPosition) {
               row++;
             }
           }
@@ -63,7 +67,7 @@ qx.Class.define("formgenerator.FormGenerator",
         if (currentOption.element) {
           var element = this._createElement(currentOption.element);
           if (element != "empty") {
-            if (currentOption.label && currentOption.label.position && currentOption.label.position == "top") {
+            if (topPosition) {
               child.add(element, {row: row, column: 0});
             }
             else {
