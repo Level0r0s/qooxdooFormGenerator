@@ -16,7 +16,7 @@ qx.Class.define("formgenerator.FormGenerator",
       //поэтому будем использовать Composite вместо обычного виджета
       var child = new qx.ui.container.Composite();
       child.setLayout(new qx.ui.layout.Grid(15, 15));
-      //child.add(new qx.ui.basic.Label("ggg"), {row: 0,column: 0});
+
       this._add(child, {row: 0, column: i});
 
       console.log(options[i].elements);
@@ -57,6 +57,9 @@ qx.Class.define("formgenerator.FormGenerator",
         case "textarea":
           element = this._createTextArea();
           break;
+        case "radiobuttongroup":
+          element = this._createRadioButtonGroup(options.data);
+          break;
       }
       return element;
     },
@@ -65,6 +68,13 @@ qx.Class.define("formgenerator.FormGenerator",
     },
     _createTextArea:  function() {
       return new qx.ui.form.TextArea();
+    },
+    _createRadioButtonGroup: function(options) {
+      var radioGroup = new qx.ui.form.RadioButtonGroup();
+      for (var i = 0; i < options.length; i++) {
+        radioGroup.add(new qx.ui.form.RadioButton(options[i]));
+      }
+      return radioGroup;
     }
   }
 });
