@@ -53,15 +53,22 @@ qx.Class.define("formgenerator.FormGenerator",
               label.set(currentOption.label.options);
             }
             child.add(label, {row: row, column: 0});
+            if (currentOption.label.position && currentOption.label.position == "top") {
+              row++;
+            }
           }
         }
-
 
         //если есть свойство element  попробуем добавить элемент
         if (currentOption.element) {
           var element = this._createElement(currentOption.element);
           if (element != "empty") {
-            child.add(element, {row: row, column: 1});
+            if (currentOption.label && currentOption.label.position && currentOption.label.position == "top") {
+              child.add(element, {row: row, column: 0});
+            }
+            else {
+              child.add(element, {row: row, column: 1});
+            }
           }
         }
 

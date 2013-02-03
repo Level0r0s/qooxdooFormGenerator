@@ -80,7 +80,6 @@ qx.Class.define("formgenerator.Application",
       var formProperties =
         [
           {
-            name: "First column",
             elements:
             [{
               element: "textfield"//label нет, так же "плохо" определенный тип элемента (но элемент все равно создастся)
@@ -106,18 +105,18 @@ qx.Class.define("formgenerator.Application",
               element: {type: "radiobuttongroup", data: {}},//радиогруппа с неправильным свойством data не отобразится
               label:   "wrong radiogroup"
             }]
-          }/*,
+          },
           {
             name: "Second column",
             elements:
             [{
-              type:  "textfield",
+              element:  "textfield",
               label: "Additional information"
             }, {
-              type:  "textarea",
+              element:  "textarea",
               label: "Bio"
             }]
-          }*/
+          }
         ];
 
       var formGenerator = new formgenerator.FormGenerator(formProperties);
