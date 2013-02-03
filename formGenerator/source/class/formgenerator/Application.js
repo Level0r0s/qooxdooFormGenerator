@@ -77,38 +77,38 @@ qx.Class.define("formgenerator.Application",
         listData.push("Item No " + i);
       }
 
-      var formProperties =
-        [
-          {
-            elements:
-            [{
-              element: {type: "textfield", propertyName: "property1"}//т.к. нет Label свойство для связи с моделью обязательно нужно указывать
-            }, {
-              element: {type: "radiobuttongroup", data: ["Male", "Female"]},//нормально определенный элемент, свойство модели - gender
-              label:   {name: "Gender", position: "left"}
-            }, {
-              element: {type: "textfield"},
-              label:   {name: "Last Name", position: "top"}//свойство модели - будет LastName
-            }, {
-              element: {type: "textfield"},
-              label:   "Country"//"плохо" определенный label, своство модели будет - Country
-            }, {
-              element: {type: "textfield"},
-              label:   {name: "<b>City</b>", options: {textColor: "red", rich: true}}//label с options, свойство модели - City (теги и пробелы обрезаются)
-            }, {
-              element: {type: "abracadabra"},//элемент с неизвестным типом, не создастся
-              label:   {name: "simple label"}//свойство модели - simplelabel
-            }, {
-              element: {type: "textfield"},//т.к. неправильно определен label, и нет свойства propertyName - мы не можем определить свойство модели => элемент создан не будет
-              label:   {name111: "fff"}//неправильный label, с непонятным свойством
-            }, {
-              element: {type: "radiobuttongroup", data: {}},//радиогруппа с неправильным свойством data не отобразится
-              label:   "wrong radiogroup"
-            }, {
-              element: "textfield",
-              label:   "lastLabel"
-            }
-            ]
+      var formProperties = {
+        items:
+          [
+            {
+              elements:
+              [{
+                element: {type: "textfield", propertyName: "property1"}//т.к. нет Label свойство для связи с моделью обязательно нужно указывать
+              }, {
+                element: {type: "radiobuttongroup", data: ["Male", "Female"]},//нормально определенный элемент, свойство модели - gender
+                label:   {name: "Gender", position: "left"}
+              }, {
+                element: {type: "textfield"},
+                label:   {name: "Last Name", position: "top"}//свойство модели - будет LastName
+              }, {
+                element: {type: "textfield"},
+                label:   "Country"//"плохо" определенный label, своство модели будет - Country
+              }, {
+                element: {type: "textfield"},
+                label:   {name: "<b>City</b>", options: {textColor: "red", rich: true}}//label с options, свойство модели - City (теги и пробелы обрезаются)
+              }, {
+                element: {type: "abracadabra"},//элемент с неизвестным типом, не создастся
+                label:   {name: "simple label"}//свойство модели - simplelabel
+              }, {
+                element: {type: "textfield"},//т.к. неправильно определен label, и нет свойства propertyName - мы не можем определить свойство модели => элемент создан не будет
+                label:   {name111: "fff"}//неправильный label, с непонятным свойством
+              }, {
+                element: {type: "radiobuttongroup", data: {}},//радиогруппа с неправильным свойством data не отобразится
+                label:   "wrong radiogroup"
+              }, {
+                element: "textfield",
+                label:   "lastLabel"
+              }]
           },
           {
             name: "Second column",
@@ -121,7 +121,8 @@ qx.Class.define("formgenerator.Application",
               label: "Bio"
             }]
           }
-        ];
+        ]
+      };
 
       var formGenerator = new formgenerator.FormGenerator(formProperties);
       this.getRoot().add(formGenerator, {top: 10, left:10});

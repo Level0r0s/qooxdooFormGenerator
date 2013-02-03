@@ -9,9 +9,9 @@ qx.Class.define("formgenerator.FormGenerator",
     //установили менеджер разметки
   	var layout = new qx.ui.layout.Grid(10, 10);
   	this._setLayout(layout);
-
+    var items = options.items;
     //добавляем дочерние виджеты
-    for (var i = 0; i < options.length; i++) {
+    for (var i = 0; i < items.length; i++) {
       //нам нужно установить менеджер раскладки, и иметь публичные методы для управления дочерними виджетами
       //поэтому будем использовать Composite вместо обычного виджета
       var child = new qx.ui.container.Composite();
@@ -22,17 +22,17 @@ qx.Class.define("formgenerator.FormGenerator",
       var row = 0;
 
       //если есть заголовок, создадим его
-      if (options[i].name) {
+      if (items[i].name) {
         var label = new qx.ui.basic.Label().set({
-          value: "<b>" + options[i].name + "</b>",
+          value: "<b>" + items[i].name + "</b>",
           rich: true
         });
         child.add(label, {row: row, column: 0})
         row++;
       }
 
-      for (var j = 0; j < options[i].elements.length; j++) {
-        var currentOption = options[i].elements[j];
+      for (var j = 0; j < items[i].elements.length; j++) {
+        var currentOption = items[i].elements[j];
 
         //позиция label top, (если есть)
         var topPosition   = currentOption.label && currentOption.label.position && currentOption.label.position == "top";
