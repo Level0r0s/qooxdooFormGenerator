@@ -167,6 +167,18 @@ qx.Class.define("formgenerator.FormGenerator",
   members: {
     _model: null,
     _controller: null,
+    _inArray: function in_array(needle, haystack, strict) { // Checks if a value exists in an array
+      // + original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+      var found = false, key, strict = !!strict;
+        for (key in haystack) {
+          if ((strict && haystack[key] === needle) || (!strict && haystack[key] == needle)) {
+            found = true;
+            break;
+          }
+        }
+        return found;
+    },
+    _modelProperties: [],//нужен, чтобы исключить биндинг двух элементов с одинаковым label на одну модель, т.е. в такой "плохой" ситуации забиндится только первый элемент
     _createElement: function(options) {
       var propertyName = null;
       //Сначала определим propertyName:
@@ -206,12 +218,18 @@ qx.Class.define("formgenerator.FormGenerator",
         case "textfield":
           element = this._createTextField();
           //binding с контроллером:
-          this._controller.addTarget(element, "value", propertyName, true);
+          if (!this._inArray(propertyName, this._modelProperties)) {
+            this._controller.addTarget(element, "value", propertyName, true);
+            this._modelProperties.push(propertyName);
+          }
           break;
         case "textarea":
           element = this._createTextArea();
           //binding с контроллером:
-          this._controller.addTarget(element, "value", propertyName, true);
+          if (!this._inArray(propertyName, this._modelProperties)) {
+            this._controller.addTarget(element, "value", propertyName, true);
+            this._modelProperties.push(propertyName);
+          }
           break;
         case "radiobuttongroup":
           //радиогруппа требует data
@@ -226,7 +244,14 @@ qx.Class.define("formgenerator.FormGenerator",
           if (options.element.data && toClass.call(options.element.data) == "[object Array]" && options.element.data.length) {
             element = this._createRadioButtonGroup(options.element.data);
             //binding с контроллером:
-            //this._controller.addTarget(element, "value", propertyName, true);
+            //this._controller.addTarget(element, "changeSelection", propertyName, true);
+            var options = {
+                converter : function(data) {
+                return data[0].getLabel();
+              }
+            };
+            element.bind("changeSelection", this._model, propertyName, options);
+            //this._controller.addTarget(element, "changeSelection", propertyName, true, options);
           }
 
           break;
