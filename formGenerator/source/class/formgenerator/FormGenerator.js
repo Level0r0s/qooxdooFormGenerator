@@ -9,9 +9,10 @@ qx.Class.define("formgenerator.FormGenerator",
     //установили менеджер разметки
   	var layout = new qx.ui.layout.Grid(10, 10);
   	this._setLayout(layout);
-    var items = options.items;
+    var items   = options.items;
+    var buttons = options.buttons;
 
-    //создаем модель, биндинг делаем потом (придется 2 раза проход циклом делать, неприятно, конечно)
+    //создаем модель, биндинг делаем потом (придется 2 раза проход циклом делать)
     var modelSkeleton = {};
     for (var i = 0; i < items.length; i++) {
       for (var j = 0; j < items[i].elements.length; j++) {
@@ -67,9 +68,10 @@ qx.Class.define("formgenerator.FormGenerator",
         }
       }
     }
-    console.log("modelSkeleton: ");
-    console.log(modelSkeleton);
 
+    this._model = qx.data.marshal.Json.createModel(modelSkeleton);
+    //Контроллер, чтобы связать модель с элементами формы
+    this._controller = new qx.data.controller.Object(this._model);
 
     //добавляем дочерние виджеты
     for (var i = 0; i < items.length; i++) {
@@ -130,7 +132,8 @@ qx.Class.define("formgenerator.FormGenerator",
         if (currentOption.element) {
           //если есть имя label или указан propertyName, то создаем элемент
           if (labelName != null || currentOption.element.propertyName) {
-            var element = this._createElement(currentOption.element);
+            //Здесь сделаем binding с моделью внутри _createElement
+            var element = this._createElement(currentOption);
             if (element != null) {
               if (topPosition) {
                 child.add(element, {row: row, column: 0});
@@ -146,20 +149,51 @@ qx.Class.define("formgenerator.FormGenerator",
       }
     }
 
+    //Добавим кнопки
+    if (buttons.length) {
+      child = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
+      for (var i = 0; i < buttons.length; i++) {
+        var button = new qx.ui.form.Button(buttons[i].text);
+        button.addListener("execute", buttons[i].callback, this);
+        child.add(button);
+      }
+      this._add(child, {row: 1, column: 0, colSpan: 2});
+    }
+
   	var borderColor = 'black';
     var border = new qx.ui.decoration.Single(3, "solid", borderColor);
     this.set({decorator: border, padding: 5, minHeight: 100, minWidth: 100});
   },
   members: {
     _model: null,
+    _controller: null,
     _createElement: function(options) {
+      var propertyName = null;
+      //Сначала определим propertyName:
+      //если есть propertyName, устанавливаем его в макет будущей модели
+      if (options.element && options.element.propertyName) {
+        propertyName = options.element.propertyName;
+      }
+      //иначе пытаемся сгенерить на основе label
+      else if (options.label) {
+        if (options.label.name) {
+          propertyName = options.label.name;
+          propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
+          propertyName = propertyName.replace(/\s/g, '');
+        } else if (typeof options.label == "string") {
+          propertyName = options.label;
+          propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
+          propertyName = propertyName.replace(/\s/g, '');
+        }
+      }
+
       //определим тип элемента
-      if (options.type) {
-        var type = options.type;
+      if (options.element.type) {
+        var type = options.element.type;
       }
       else {
-        if (typeof options == "string") {
-          var type = options;
+        if (typeof options.element == "string") {
+          var type = options.element;
         }
       }
       //елси не получилось определить тип, возвращаем null (может стоит в этой функции использовать как то исключения, не знаю, потом посмотреть)
@@ -171,9 +205,13 @@ qx.Class.define("formgenerator.FormGenerator",
       switch (type) {
         case "textfield":
           element = this._createTextField();
+          //binding с контроллером:
+          this._controller.addTarget(element, "value", propertyName, true);
           break;
         case "textarea":
           element = this._createTextArea();
+          //binding с контроллером:
+          this._controller.addTarget(element, "value", propertyName, true);
           break;
         case "radiobuttongroup":
           //радиогруппа требует data
@@ -185,9 +223,12 @@ qx.Class.define("formgenerator.FormGenerator",
           //}
 
           var toClass = {}.toString;
-          if (options.data && toClass.call(options.data) == "[object Array]" && options.data.length) {
-            element = this._createRadioButtonGroup(options.data);
+          if (options.element.data && toClass.call(options.element.data) == "[object Array]" && options.element.data.length) {
+            element = this._createRadioButtonGroup(options.element.data);
+            //binding с контроллером:
+            //this._controller.addTarget(element, "value", propertyName, true);
           }
+
           break;
         default:
           //если не получилось определить тип - возвращаем пусто

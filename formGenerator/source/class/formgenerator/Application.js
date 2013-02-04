@@ -125,7 +125,10 @@ qx.Class.define("formgenerator.Application",
               element: "textfield",
               label:   "lastLabel"//перезапишется property модели
             }]
-          }
+          }],
+        buttons: [
+          {text: "Save",   callback: function() {alert("You are saving: " + qx.util.Serializer.toJson(this._model));}},
+          {text: "Cancel", callback: function() {alert("Cancel");}}
         ]
       };
 
