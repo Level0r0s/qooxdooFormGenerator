@@ -108,17 +108,22 @@ qx.Class.define("formgenerator.Application",
               }, {
                 element: "textfield",
                 label:   "lastLabel"
+              }, {
+                element: "textfield"//нет label и не указано свойство propertyName => не получается создать элемент
               }]
           },
           {
             name: "Second column",
             elements:
             [{
-              element:  "textfield",
-              label: "Additional information"
+              element: "textfield",
+              label:   "Additional information"
             }, {
-              element:  "textarea",
-              label: "Bio"
+              element: "textarea",
+              label:   "Bio"
+            }, {
+              element: "textfield",
+              label:   "lastLabel"//перезапишется property модели
             }]
           }
         ]
