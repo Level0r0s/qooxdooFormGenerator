@@ -77,6 +77,8 @@ qx.Class.define("formgenerator.Application",
         listData.push("Item No " + i);
       }
 
+
+
       var formProperties = {
         items:
           [

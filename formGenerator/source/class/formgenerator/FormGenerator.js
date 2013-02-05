@@ -37,35 +37,12 @@ qx.Class.define("formgenerator.FormGenerator",
           var propertyValue = null;
           var type          = null;
 
-          //Сначала определим propertyName:
-          //если есть propertyName, устанавливаем его в макет будущей модели
-          if (currentOption.element && currentOption.element.propertyName) {
-            propertyName = currentOption.element.propertyName;
-          }
-          //иначе пытаемся сгенерить на основе label
-          else if (currentOption.label) {
-            if (currentOption.label.name) {
-              propertyName = currentOption.label.name;
-              propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
-              propertyName = propertyName.replace(/\s/g, '');
-            } else if (typeof currentOption.label == "string") {
-              propertyName = currentOption.label;
-              propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
-              propertyName = propertyName.replace(/\s/g, '');
-            }
-          }
+          //Сначала попытаемся определить propertyName:
+          propertyName = this._tryGetPropertyName(currentOption);
 
           //теперь, если свойство propertyName есть -> пытаемся сгенерить начальное значение для этого property на основе типа элемента
           if (propertyName && currentOption.element) {
-            //определим тип элемента, пытаемся определить тип элемента
-            if (currentOption.element.type) {
-              type = currentOption.element.type;
-            }
-            else {
-              if (typeof currentOption.element == "string") {
-                type = currentOption.element;
-              }
-            }
+            type = this._tryGetType(currentOption);
             switch (type) {
               case "textfield":
                 //по умолчанию будет null
@@ -187,41 +164,14 @@ qx.Class.define("formgenerator.FormGenerator",
       }
     },
     _modelProperties: [],//нужен, чтобы исключить биндинг двух элементов с одинаковым label на одну модель, т.е. в такой "плохой" ситуации забиндится только первый элемент
-    _createElement: function(options) {
+    _createElement: function(currentOption) {
       var propertyName = null;
-      //Сначала определим propertyName:
-      //если есть propertyName, устанавливаем его в макет будущей модели
-      if (options.element && options.element.propertyName) {
-        propertyName = options.element.propertyName;
-      }
-      //иначе пытаемся сгенерить на основе label
-      else if (options.label) {
-        if (options.label.name) {
-          propertyName = options.label.name;
-          propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
-          propertyName = propertyName.replace(/\s/g, '');
-        } else if (typeof options.label == "string") {
-          propertyName = options.label;
-          propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
-          propertyName = propertyName.replace(/\s/g, '');
-        }
-      }
+      var type         = null;
+      var element      = null;
+      //пытаемся определить propertyName и type
+      propertyName = this._tryGetPropertyName(currentOption);
+      type         = this._tryGetType(currentOption);
 
-      //определим тип элемента
-      if (options.element.type) {
-        var type = options.element.type;
-      }
-      else {
-        if (typeof options.element == "string") {
-          var type = options.element;
-        }
-      }
-      //елси не получилось определить тип, возвращаем null (может стоит в этой функции использовать как то исключения, не знаю, потом посмотреть)
-      if (!type) {
-        return null;
-      }
-
-      var element = null;
       switch (type) {
         case "textfield":
           element = this._createTextField();
@@ -243,16 +193,16 @@ qx.Class.define("formgenerator.FormGenerator",
           break;
         case "radiobuttongroup":
           //радиогруппа требует data
-          //проведем проверку, что options.data, если существует - то это массив
+          //проведем проверку, что currentOption.data, если существует - то это массив
 
           //лучше проверить не через instanceof все таки, а одолжив toString метод
-          //if (options.data && options.data instanceof Array && options.data.length) {
-          //  element = this._createRadioButtonGroup(options.data);
+          //if (currentOption.data && currentOption.data instanceof Array && currentOption.data.length) {
+          //  element = this._createRadioButtonGroup(currentOption.data);
           //}
 
           var toClass = {}.toString;
-          if (options.element.data && toClass.call(options.element.data) == "[object Array]" && options.element.data.length) {
-            element = this._createRadioButtonGroup(options.element.data);
+          if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+            element = this._createRadioButtonGroup(currentOption.element.data);
 
             //биндинг
             element.bind("modelSelection[0]", this._model, propertyName)
@@ -274,14 +224,51 @@ qx.Class.define("formgenerator.FormGenerator",
     _createTextArea:  function() {
       return new qx.ui.form.TextArea();
     },
-    _createRadioButtonGroup: function(options) {
+    _createRadioButtonGroup: function(data) {
       var radioGroup = new qx.ui.form.RadioButtonGroup();
-      for (var i = 0; i < options.length; i++) {
-        var radioButton = new qx.ui.form.RadioButton(options[i]);
-        radioButton.setModel(options[i]);
+      for (var i = 0; i < data.length; i++) {
+        var radioButton = new qx.ui.form.RadioButton(data[i]);
+        radioButton.setModel(data[i]);
         radioGroup.add(radioButton);
       }
       return radioGroup;
+    },
+    //метод пытается получить свойство name для элемента
+    _tryGetPropertyName: function(currentOption) {
+      var propertyName = null;
+      //если есть propertyName, устанавливаем его в макет будущей модели
+      if (currentOption.element && currentOption.element.propertyName) {
+        propertyName = currentOption.element.propertyName;
+      }
+      //иначе пытаемся сгенерить на основе label
+      else if (currentOption.label) {
+        if (currentOption.label.name && typeof currentOption.label.name == "string") {
+          propertyName = currentOption.label.name;
+          propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
+          propertyName = propertyName.replace(/\s/g, '');
+        } else if (typeof currentOption.label == "string") {
+          propertyName = currentOption.label;
+          propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
+          propertyName = propertyName.replace(/\s/g, '');
+        }
+      }
+      return propertyName;
+    },
+    //метод пытается получить свойство type для элемента
+    _tryGetType: function(currentOption) {
+      var type = null;
+      if (currentOption.element) {
+        //определим тип элемента, пытаемся определить тип элемента
+        if (currentOption.element.type && typeof currentOption.element.type == "string") {
+          type = currentOption.element.type;
+        }
+        else {
+          if (typeof currentOption.element == "string") {
+            type = currentOption.element;
+          }
+        }
+      }
+      return type;
     }
   }
 });
