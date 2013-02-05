@@ -26,11 +26,13 @@ qx.Class.define("formgenerator.FormGenerator",
   },
   members: {
     //создание модели с данными из формы
+    //значения по умолчанию, если они допустимы (например для радиогруппы возможно значение из дискретного набора), то они установятся значениями модели.
     _createModel: function(options) {
       var items   = options.items;
       var modelSkeleton = {};
       for (var i = 0; i < items.length; i++) {
         for (var j = 0; j < items[i].elements.length; j++) {
+
           var currentOption = items[i].elements[j];
 
           var propertyName  = null;
@@ -45,25 +47,38 @@ qx.Class.define("formgenerator.FormGenerator",
             type = this._tryGetType(currentOption);
             switch (type) {
               case "textfield":
-                //по умолчанию будет null
+                //если есть дефолтное значение - устанавливаем его, иначе значение по умолчанию - null
+                if (currentOption.element.value) {
+                  propertyValue = currentOption.element.value;
+                }
                 modelSkeleton[propertyName] = propertyValue;
                 break;
               case "textarea":
-                //по умолчанию будет null
+                //если есть дефолтное значение - устанавливаем его, иначе значение по умолчанию - null
+                if (currentOption.element.value) {
+                  propertyValue = currentOption.element.value;
+                }
                 modelSkeleton[propertyName] = propertyValue;
                 break;
               case "radiobuttongroup":
                 var toClass = {}.toString;
                 if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+                  if (currentOption.element.value && this._inArray(currentOption.element.value, currentOption.element.data)) {
+                    propertyValue = currentOption.element.value;
+                  } else {
+                    propertyValue = currentOption.element.data[0];
+                  }
                   //по умолчанию первый из списка
-                  modelSkeleton[propertyName] = currentOption.element.data[0];
+                  modelSkeleton[propertyName] = propertyValue;
                 }
                 break;
             }
           }
         }
       }
+      console.log(modelSkeleton);
       this._model = qx.data.marshal.Json.createModel(modelSkeleton);
+      this._controller = new qx.data.controller.Object(this._model);
     },
     _createFormItems: function(options) {
       var items = options.items;
@@ -139,6 +154,7 @@ qx.Class.define("formgenerator.FormGenerator",
       }
     },
     _model: null,
+    _controller: null,
     _inArray: function in_array(needle, haystack, strict) { // Checks if a value exists in an array
       // + original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
       var found = false, key, strict = !!strict;
@@ -177,8 +193,7 @@ qx.Class.define("formgenerator.FormGenerator",
           element = this._createTextField();
           //binding с контроллером:
           if (!this._inArray(propertyName, this._modelProperties)) {
-            element.bind("value", this._model, propertyName);
-            this._model.bind(propertyName, element, "value");
+            this._controller.addTarget(element, "value", propertyName, true);
             this._modelProperties.push(propertyName);
           }
           break;
@@ -186,8 +201,7 @@ qx.Class.define("formgenerator.FormGenerator",
           element = this._createTextArea();
           //binding с контроллером:
           if (!this._inArray(propertyName, this._modelProperties)) {
-            element.bind("value", this._model, propertyName);
-            this._model.bind(propertyName, element, "value");
+            this._controller.addTarget(element, "value", propertyName, true);
             this._modelProperties.push(propertyName);
           }
           break;
@@ -203,11 +217,10 @@ qx.Class.define("formgenerator.FormGenerator",
           var toClass = {}.toString;
           if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
             element = this._createRadioButtonGroup(currentOption.element.data);
-
             //биндинг
-            element.bind("modelSelection[0]", this._model, propertyName)
-            this._model.bind(propertyName, element, "modelSelection[0]");
-            //this._model.set(propertyName, "Female");
+            //element.bind("modelSelection[0]", this._model, propertyName)
+            //this._model.bind(propertyName, element, "modelSelection[0]");
+            this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
           }
 
           break;

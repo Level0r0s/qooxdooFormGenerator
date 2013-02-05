@@ -148,11 +148,11 @@ qx.Class.define("formgenerator.Application",
             name: "First Column",
             elements: [
               {
-                element: {type: "textfield",  property: "firstName"},
+                element: {type: "textfield",  propertyName: "firstName", value: "Ivan"},
                 label:   {name: "First Name", position: "top", options: {textColor: "red", rich: true}}
               },
               {
-                element: {type: "textfield", property: "lastName"},
+                element: {type: "textfield", propertyName: "lastName", value: "Golubev"},
                 label:   {name: "Last Name", position: "top"}
               }
             ]
@@ -162,11 +162,11 @@ qx.Class.define("formgenerator.Application",
             name: "Second Column",
             elements: [
               {
-                element: {type: "radiobuttongroup", data: ["Male", "Female"], propertyName: "gender"},
+                element: {type: "radiobuttongroup", data: ["Male", "Female"], propertyName: "gender", value: "Female"},
                 label:   {name: "Gender", position: "left"}
               },
               {
-                element: {type: "textarea", propertyName: "bio"},
+                element: {type: "textarea", propertyName: "bio", value: "I am cool guy!!! :)"},
                 label:   {name: "Bio"}
               }
             ]
