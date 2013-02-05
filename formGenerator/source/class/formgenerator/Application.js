@@ -110,6 +110,8 @@ qx.Class.define("formgenerator.Application",
                 label:   "lastLabel"
               }, {
                 element: "textfield"//нет label и не указано свойство propertyName => не получается создать элемент
+              }, {
+                label: "sync_master"
               }]
           },
           {

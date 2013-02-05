@@ -13,64 +13,8 @@ qx.Class.define("formgenerator.FormGenerator",
     var items   = options.items;
     var buttons = options.buttons;
 
-    //создаем модель, биндинг делаем потом (придется 2 раза проход циклом делать)
-    var modelSkeleton = {};
-    for (var i = 0; i < items.length; i++) {
-      for (var j = 0; j < items[i].elements.length; j++) {
-        var currentOption = items[i].elements[j];
-
-        var propertyName  = null;
-        var propertyValue = null;
-        var type          = null;
-
-        //Сначала определим propertyName:
-        //если есть propertyName, устанавливаем его в макет будущей модели
-        if (currentOption.element && currentOption.element.propertyName) {
-          propertyName = currentOption.element.propertyName;
-        }
-        //иначе пытаемся сгенерить на основе label
-        else if (currentOption.label) {
-          if (currentOption.label.name) {
-            propertyName = currentOption.label.name;
-            propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
-            propertyName = propertyName.replace(/\s/g, '');
-          } else if (typeof currentOption.label == "string") {
-            propertyName = currentOption.label;
-            propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
-            propertyName = propertyName.replace(/\s/g, '');
-          }
-        }
-
-        //теперь, если свойство propertyName есть -> пытаемся сгенерить начальное значение для этого property на основе типа элемента
-        if (propertyName) {
-          //определим тип элемента
-          if (currentOption.element.type) {
-            type = currentOption.element.type;
-          }
-          else {
-            if (typeof currentOption.element == "string") {
-              type = currentOption.element;
-            }
-          }
-          switch (type) {
-            case "textfield":
-              modelSkeleton[propertyName] = propertyValue;
-              break;
-            case "textarea":
-              modelSkeleton[propertyName] = propertyValue;
-              break;
-            case "radiobuttongroup":
-              var toClass = {}.toString;
-              if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
-                modelSkeleton[propertyName] = currentOption.element.data[0];
-              }
-              break;
-          }
-        }
-      }
-    }
-
-    this._model = qx.data.marshal.Json.createModel(modelSkeleton);
+    //создадим модель
+    this._createModel(options);
 
     //добавляем дочерние виджеты
     for (var i = 0; i < items.length; i++) {
@@ -165,8 +109,68 @@ qx.Class.define("formgenerator.FormGenerator",
   members: {
     //создание модели с данными из формы
     _createModel: function(options) {
+      var items   = options.items;
 
-    } ,
+      var modelSkeleton = {};
+      for (var i = 0; i < items.length; i++) {
+        for (var j = 0; j < items[i].elements.length; j++) {
+          var currentOption = items[i].elements[j];
+
+          var propertyName  = null;
+          var propertyValue = null;
+          var type          = null;
+
+          //Сначала определим propertyName:
+          //если есть propertyName, устанавливаем его в макет будущей модели
+          if (currentOption.element && currentOption.element.propertyName) {
+            propertyName = currentOption.element.propertyName;
+          }
+          //иначе пытаемся сгенерить на основе label
+          else if (currentOption.label) {
+            if (currentOption.label.name) {
+              propertyName = currentOption.label.name;
+              propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
+              propertyName = propertyName.replace(/\s/g, '');
+            } else if (typeof currentOption.label == "string") {
+              propertyName = currentOption.label;
+              propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
+              propertyName = propertyName.replace(/\s/g, '');
+            }
+          }
+
+          //теперь, если свойство propertyName есть -> пытаемся сгенерить начальное значение для этого property на основе типа элемента
+          if (propertyName && currentOption.element) {
+            //определим тип элемента, пытаемся определить тип элемента
+            if (currentOption.element.type) {
+              type = currentOption.element.type;
+            }
+            else {
+              if (typeof currentOption.element == "string") {
+                type = currentOption.element;
+              }
+            }
+            switch (type) {
+              case "textfield":
+                //по умолчанию будет null
+                modelSkeleton[propertyName] = propertyValue;
+                break;
+              case "textarea":
+                //по умолчанию будет null
+                modelSkeleton[propertyName] = propertyValue;
+                break;
+              case "radiobuttongroup":
+                var toClass = {}.toString;
+                if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+                  //по умолчанию первый из списка
+                  modelSkeleton[propertyName] = currentOption.element.data[0];
+                }
+                break;
+            }
+          }
+        }
+      }
+      this._model = qx.data.marshal.Json.createModel(modelSkeleton);
+    },
     _model: null,
     _inArray: function in_array(needle, haystack, strict) { // Checks if a value exists in an array
       // + original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
