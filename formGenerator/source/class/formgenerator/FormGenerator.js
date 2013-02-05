@@ -207,7 +207,7 @@ qx.Class.define("formgenerator.FormGenerator",
             //биндинг
             element.bind("modelSelection[0]", this._model, propertyName)
             this._model.bind(propertyName, element, "modelSelection[0]");
-            this._model.set(propertyName, "Female");
+            //this._model.set(propertyName, "Female");
           }
 
           break;

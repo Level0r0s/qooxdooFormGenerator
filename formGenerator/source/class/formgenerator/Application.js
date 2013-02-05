@@ -71,13 +71,16 @@ qx.Class.define("formgenerator.Application",
                 элемент создан не будет
       */
 
+
+
+
+      /*
+      //Вариант данных для генерации формы № 1.
       //массив для single selection list
       var listData = [];
       for (var i = 0; i < 25; i++) {
         listData.push("Item No " + i);
       }
-
-
 
       var formProperties = {
         items:
@@ -130,6 +133,45 @@ qx.Class.define("formgenerator.Application",
               label:   "lastLabel"//перезапишется property модели
             }]
           }],
+        buttons: [
+          {text: "Save",   callback: function() {alert("You are saving: " + qx.util.Serializer.toJson(this._model));}},
+          {text: "Cancel", callback: function() {alert("Cancel");}}
+        ]
+      };
+      */
+
+      //Вариант для генерации формы № 2
+      var formProperties = {
+        items: [
+          //1-я колонка
+          {
+            name: "First Column",
+            elements: [
+              {
+                element: {type: "textfield",  property: "firstName"},
+                label:   {name: "First Name", position: "top", options: {textColor: "red", rich: true}}
+              },
+              {
+                element: {type: "textfield", property: "lastName"},
+                label:   {name: "Last Name", position: "top"}
+              }
+            ]
+          },
+          //2-я колонка
+          {
+            name: "Second Column",
+            elements: [
+              {
+                element: {type: "radiobuttongroup", data: ["Male", "Female"], propertyName: "gender"},
+                label:   {name: "Gender", position: "left"}
+              },
+              {
+                element: {type: "textarea", propertyName: "bio"},
+                label:   {name: "Bio"}
+              }
+            ]
+          }
+        ],
         buttons: [
           {text: "Save",   callback: function() {alert("You are saving: " + qx.util.Serializer.toJson(this._model));}},
           {text: "Cancel", callback: function() {alert("Cancel");}}
