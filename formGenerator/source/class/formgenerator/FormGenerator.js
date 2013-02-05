@@ -6,90 +6,16 @@ qx.Class.define("formgenerator.FormGenerator",
 
   	this.base(arguments);
 
-    //установили менеджер разметки
+    //установим менеджер разметки
   	var layout = new qx.ui.layout.Grid(10, 10);
   	this._setLayout(layout);
 
-    var items   = options.items;
     var buttons = options.buttons;
 
     //создадим модель
     this._createModel(options);
 
-    //добавляем дочерние виджеты
-    for (var i = 0; i < items.length; i++) {
-      //нам нужно установить менеджер раскладки, и иметь публичные методы для управления дочерними виджетами
-      //поэтому будем использовать Composite вместо обычного виджета
-      var child = new qx.ui.container.Composite();
-      child.setLayout(new qx.ui.layout.Grid(15, 15));
-
-      this._add(child, {row: 0, column: i});
-
-      var row = 0;
-
-      //если есть заголовок, создадим его
-      if (items[i].name) {
-        var label = new qx.ui.basic.Label().set({
-          value: "<b>" + items[i].name + "</b>",
-          rich: true
-        });
-        child.add(label, {row: row, column: 0})
-        row++;
-      }
-
-      for (var j = 0; j < items[i].elements.length; j++) {
-        var currentOption = items[i].elements[j];
-
-        //позиция label top, (если есть)
-        var topPosition   = currentOption.label && currentOption.label.position && currentOption.label.position == "top";
-
-        //если есть label в свойствах
-        if (currentOption.label) {
-          //указан ли label через объект, или нет
-          if (currentOption.label.name) {
-            var labelName = currentOption.label.name;
-          } else {
-            if (typeof currentOption.label == "string") {
-              var labelName = currentOption.label;
-            } else {
-              var labelName = null;
-            }
-          }
-
-          if (labelName != null) {
-            var label   = new qx.ui.basic.Label(labelName);
-            //если есть option, установим их для label
-            if (currentOption.label.options) {
-              label.set(currentOption.label.options);
-            }
-            child.add(label, {row: row, column: 0});
-            if (topPosition) {
-              row++;
-            }
-          }
-        } else {
-          var labelName = null;
-        }
-
-        //если есть свойство element  попробуем добавить элемент
-        if (currentOption.element) {
-          //если есть имя label или указан propertyName, то создаем элемент
-          if (labelName != null || currentOption.element.propertyName) {
-            //Здесь сделаем binding с моделью внутри _createElement
-            var element = this._createElement(currentOption);
-            if (element != null) {
-              if (topPosition) {
-                child.add(element, {row: row, column: 0});
-              }
-              else {
-                child.add(element, {row: row, column: 1});
-              }
-            }
-          }
-        }
-        row++;
-      }
-    }
+    this._createFormItems(options);
 
     //Добавим кнопки
     if (buttons.length) {
@@ -170,6 +96,79 @@ qx.Class.define("formgenerator.FormGenerator",
         }
       }
       this._model = qx.data.marshal.Json.createModel(modelSkeleton);
+    },
+    _createFormItems: function(options) {
+      var items = options.items;
+      //добавляем дочерние виджеты
+      for (var i = 0; i < items.length; i++) {
+        //нам нужно установить менеджер раскладки, и иметь публичные методы для управления дочерними виджетами
+        //поэтому будем использовать Composite вместо обычного виджета
+        var child = new qx.ui.container.Composite();
+        child.setLayout(new qx.ui.layout.Grid(15, 15));
+        this._add(child, {row: 0, column: i});
+
+        //теперь, после того, как добавили колонку, начнем её заполнять
+        var row = 0;
+
+        //если есть заголовок, создадим его
+        if (items[i].name) {
+          var label = new qx.ui.basic.Label().set({
+            value: "<b>" + items[i].name + "</b>",
+            rich: true
+          });
+          child.add(label, {row: row, column: 0})
+          row++;
+        }
+
+        for (var j = 0; j < items[i].elements.length; j++) {
+          var currentOption = items[i].elements[j];
+
+          //Пробуем добавить label
+          //позиция label top, (если есть)
+          var topPosition   = currentOption.label && currentOption.label.position && currentOption.label.position == "top";
+          var labelName     = null;
+          //если есть label в свойствах
+          if (currentOption.label) {
+            //указан ли label через объект, или нет
+            if (currentOption.label.name) {
+              labelName = currentOption.label.name;
+            } else if (typeof currentOption.label == "string") {
+              labelName = currentOption.label;
+            }
+            //если есть имя для label, создаем его
+            if (labelName != null) {
+              var label   = new qx.ui.basic.Label(labelName);
+              //если есть option, установим их для label
+              if (currentOption.label.options) {
+                label.set(currentOption.label.options);
+              }
+              child.add(label, {row: row, column: 0});
+              //если label над элементом
+              if (topPosition) {
+                row++;
+              }
+            }
+          }
+
+          //если есть свойство element  попробуем добавить элемент
+          if (currentOption.element) {
+            //если есть имя label или указан propertyName, то создаем элемент
+            if (labelName != null || currentOption.element.propertyName) {
+              //Внутри ф-ции создания элемента делается binding с моделью, если получается создать элемент
+              var element = this._createElement(currentOption);
+              if (element != null) {
+                if (topPosition) {
+                  child.add(element, {row: row, column: 0});
+                }
+                else {
+                  child.add(element, {row: row, column: 1});
+                }
+              }
+            }
+          }
+          row++;
+        }
+      }
     },
     _model: null,
     _inArray: function in_array(needle, haystack, strict) { // Checks if a value exists in an array
