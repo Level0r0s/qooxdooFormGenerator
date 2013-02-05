@@ -10,24 +10,16 @@ qx.Class.define("formgenerator.FormGenerator",
   	var layout = new qx.ui.layout.Grid(10, 10);
   	this._setLayout(layout);
 
-    var buttons = options.buttons;
-
     //создадим модель
     this._createModel(options);
 
+    //заполним форму элементами, и сделаем binding с моделью
     this._createFormItems(options);
 
-    //Добавим кнопки
-    if (buttons.length) {
-      child = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
-      for (var i = 0; i < buttons.length; i++) {
-        var button = new qx.ui.form.Button(buttons[i].text);
-        button.addListener("execute", buttons[i].callback, this);
-        child.add(button);
-      }
-      this._add(child, {row: 1, column: 0, colSpan: 2});
-    }
+    //создадим кнопки
+    this._createButtons(options);
 
+    //Затем займемся внешним видом
   	var borderColor = 'black';
     var border = new qx.ui.decoration.Single(3, "solid", borderColor);
     this.set({decorator: border, padding: 5, minHeight: 100, minWidth: 100});
@@ -36,7 +28,6 @@ qx.Class.define("formgenerator.FormGenerator",
     //создание модели с данными из формы
     _createModel: function(options) {
       var items   = options.items;
-
       var modelSkeleton = {};
       for (var i = 0; i < items.length; i++) {
         for (var j = 0; j < items[i].elements.length; j++) {
@@ -181,6 +172,19 @@ qx.Class.define("formgenerator.FormGenerator",
           }
         }
         return found;
+    },
+    _createButtons: function(options) {
+      var buttons = options.buttons;
+      //Добавим кнопки
+      if (buttons.length) {
+        child = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
+        for (var i = 0; i < buttons.length; i++) {
+          var button = new qx.ui.form.Button(buttons[i].text);
+          button.addListener("execute", buttons[i].callback, this);
+          child.add(button);
+        }
+        this._add(child, {row: 1, column: 0, colSpan: 2});
+      }
     },
     _modelProperties: [],//нужен, чтобы исключить биндинг двух элементов с одинаковым label на одну модель, т.е. в такой "плохой" ситуации забиндится только первый элемент
     _createElement: function(options) {
