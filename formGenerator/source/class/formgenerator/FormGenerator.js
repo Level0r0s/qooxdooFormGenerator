@@ -9,6 +9,7 @@ qx.Class.define("formgenerator.FormGenerator",
     //установили менеджер разметки
   	var layout = new qx.ui.layout.Grid(10, 10);
   	this._setLayout(layout);
+
     var items   = options.items;
     var buttons = options.buttons;
 
@@ -70,8 +71,6 @@ qx.Class.define("formgenerator.FormGenerator",
     }
 
     this._model = qx.data.marshal.Json.createModel(modelSkeleton);
-    //Контроллер, чтобы связать модель с элементами формы
-    this._controller = new qx.data.controller.Object(this._model);
 
     //добавляем дочерние виджеты
     for (var i = 0; i < items.length; i++) {
@@ -144,7 +143,6 @@ qx.Class.define("formgenerator.FormGenerator",
             }
           }
         }
-
         row++;
       }
     }
@@ -165,8 +163,11 @@ qx.Class.define("formgenerator.FormGenerator",
     this.set({decorator: border, padding: 5, minHeight: 100, minWidth: 100});
   },
   members: {
+    //создание модели с данными из формы
+    _createModel: function(options) {
+
+    } ,
     _model: null,
-    _controller: null,
     _inArray: function in_array(needle, haystack, strict) { // Checks if a value exists in an array
       // + original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
       var found = false, key, strict = !!strict;
@@ -219,7 +220,8 @@ qx.Class.define("formgenerator.FormGenerator",
           element = this._createTextField();
           //binding с контроллером:
           if (!this._inArray(propertyName, this._modelProperties)) {
-            this._controller.addTarget(element, "value", propertyName, true);
+            element.bind("value", this._model, propertyName);
+            this._model.bind(propertyName, element, "value");
             this._modelProperties.push(propertyName);
           }
           break;
@@ -227,7 +229,8 @@ qx.Class.define("formgenerator.FormGenerator",
           element = this._createTextArea();
           //binding с контроллером:
           if (!this._inArray(propertyName, this._modelProperties)) {
-            this._controller.addTarget(element, "value", propertyName, true);
+            element.bind("value", this._model, propertyName);
+            this._model.bind(propertyName, element, "value");
             this._modelProperties.push(propertyName);
           }
           break;
@@ -243,15 +246,11 @@ qx.Class.define("formgenerator.FormGenerator",
           var toClass = {}.toString;
           if (options.element.data && toClass.call(options.element.data) == "[object Array]" && options.element.data.length) {
             element = this._createRadioButtonGroup(options.element.data);
-            //binding с контроллером:
-            //this._controller.addTarget(element, "changeSelection", propertyName, true);
-            var options = {
-                converter : function(data) {
-                return data[0].getLabel();
-              }
-            };
-            element.bind("changeSelection", this._model, propertyName, options);
-            //this._controller.addTarget(element, "changeSelection", propertyName, true, options);
+
+            //биндинг
+            element.bind("modelSelection[0]", this._model, propertyName)
+            this._model.bind(propertyName, element, "modelSelection[0]");
+            this._model.set(propertyName, "Female");
           }
 
           break;
@@ -271,7 +270,9 @@ qx.Class.define("formgenerator.FormGenerator",
     _createRadioButtonGroup: function(options) {
       var radioGroup = new qx.ui.form.RadioButtonGroup();
       for (var i = 0; i < options.length; i++) {
-        radioGroup.add(new qx.ui.form.RadioButton(options[i]));
+        var radioButton = new qx.ui.form.RadioButton(options[i]);
+        radioButton.setModel(options[i]);
+        radioGroup.add(radioButton);
       }
       return radioGroup;
     }
