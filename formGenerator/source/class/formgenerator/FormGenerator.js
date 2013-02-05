@@ -76,11 +76,14 @@ qx.Class.define("formgenerator.FormGenerator",
           }
         }
       }
-      console.log(modelSkeleton);
+
       this._model = qx.data.marshal.Json.createModel(modelSkeleton);
       this._controller = new qx.data.controller.Object(this._model);
     },
     _createFormItems: function(options) {
+      //инициализируем валидатор
+      this._manager = new qx.ui.form.validation.Manager();
+
       var items = options.items;
       //добавляем дочерние виджеты
       for (var i = 0; i < items.length; i++) {
@@ -139,7 +142,26 @@ qx.Class.define("formgenerator.FormGenerator",
             if (labelName != null || currentOption.element.propertyName) {
               //Внутри ф-ции создания элемента делается binding с моделью, если получается создать элемент
               var element = this._createElement(currentOption);
+
+              //если все хорошо, применяем валидацию, если есть, и добавляем элемент
               if (element != null) {
+                //Здесь блок валидации идет:
+                if (currentOption.element.validate && currentOption.element.validate.funct) {
+                  var validate = null;
+                  //если свой валидатор:
+                  if (typeof currentOption.element.validate.funct == "function") {
+                    validate = currentOption.element.validate.funct;
+                    this._manager.add(element, validate);
+                  }
+                  //иначе пробуем подобрать валидатор из готового набора
+                  else if (typeof currentOption.element.validate.funct == "string") {
+                    validate = this._tryComputeValidator(currentOption.element.validate);
+                    if (validate) {
+                      this._manager.add(element, validate);
+                    }
+                  }
+                }
+
                 if (topPosition) {
                   child.add(element, {row: row, column: 0});
                 }
@@ -155,6 +177,7 @@ qx.Class.define("formgenerator.FormGenerator",
     },
     _model: null,
     _controller: null,
+    _manager: null,
     _inArray: function in_array(needle, haystack, strict) { // Checks if a value exists in an array
       // + original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
       var found = false, key, strict = !!strict;
@@ -282,6 +305,43 @@ qx.Class.define("formgenerator.FormGenerator",
         }
       }
       return type;
+    },
+    _tryComputeValidator: function(validator) {
+      var funct = validator.funct;
+      var args  = null;
+      var errorMessage = null;
+      //если есть доп. аргументы
+      if (validator.args) {
+        args = validator.args;
+      }
+      //если есть сообщение о ошибке
+      if (validator.errorMessage) {
+        errorMessage = validator.errorMessage;
+      }
+      //т.к. return, break не нужен
+      switch(funct) {
+        case "number" :
+          return qx.util.Validate.number(errorMessage);
+        case "email"  :
+          return qx.util.Validate.email(errorMessage);
+        case "string" :
+          return qx.util.Validate.string(errorMessage);
+        case "url"    :
+          return qx.util.Validate.url(errorMessage);
+        case "color"  :
+          return qx.util.Validate.color(errorMessage);
+        case "range"  :
+          if (args[0] && args[1]) {
+            return qx.util.Validate.range(args[0], args[1], errorMessage);
+          }
+          return null;
+        case "inArray":
+          return qx.util.Validate.inArray(args, errorMessage);
+        case "regExp":
+          return qx.util.Validate.regExp(args, errorMessage);
+        default:
+          return null
+      }
     }
   }
 });

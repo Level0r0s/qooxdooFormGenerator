@@ -170,10 +170,27 @@ qx.Class.define("formgenerator.Application",
                 label:   {name: "Bio"}
               }
             ]
+          },
+          //3-я колонка
+          {
+            name: "Third Column",
+            elements: [
+              {
+                element: {type: "textfield", propertyName: "email", value: "example@email.com", validate: {funct: "email"}},
+                label:   {name: "Email"}
+              }
+            ]
           }
         ],
         buttons: [
-          {text: "Save",   callback: function() {alert("You are saving: " + qx.util.Serializer.toJson(this._model));}},
+          {text: "Save",   callback: function() {
+            if (this._manager.validate()) {
+              alert("You are saving: " + qx.util.Serializer.toJson(this._model));
+            } else {
+              alert('WROOONG!!! :)');
+            }
+
+          }},
           {text: "Cancel", callback: function() {alert("Cancel");}}
         ]
       };
