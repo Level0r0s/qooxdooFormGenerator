@@ -22,7 +22,7 @@ qx.Class.define("formgenerator.FormGenerator",
     //Затем займемся внешним видом
   	var borderColor = 'black';
     var border = new qx.ui.decoration.Single(3, "solid", borderColor);
-    this.set({decorator: border, padding: 5, minHeight: 100, minWidth: 100});
+    this.set({decorator: border, padding: 5, minHeight: 100, minWidth: 100, backgroundColor: "white"});
   },
   members: {
     //создание модели с данными из формы
