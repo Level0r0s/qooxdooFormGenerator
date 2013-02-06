@@ -29,7 +29,7 @@ qx.Class.define("formgenerator.FormGenerator",
     //значения по умолчанию, если они допустимы (например для радиогруппы возможно значение из дискретного набора), то они установятся значениями модели.
     _createModel: function(options) {
       var items           = options.items;
-      var modelSkeleton   = {};
+      var modelSkeleton   = {};//каркас модели
       var modelProperties = [];//нужно, чтобы исключить переопределение свойства, в случае, если оно уже было определено
       for (var i = 0; i < items.length; i++) {
         for (var j = 0; j < items[i].elements.length; j++) {
@@ -40,6 +40,8 @@ qx.Class.define("formgenerator.FormGenerator",
           var type          = null;
 
           //Сначала попытаемся определить propertyName:
+          //propertyName - название свойства модели, которое будет связано с элементом формы
+          //определить его можно. если оно либо явно указано в элементе, в противном случае на основе label можно попробовать сгенерить
           propertyName = this._tryGetPropertyName(currentOption);
 
           //теперь, если свойство propertyName есть -> пытаемся сгенерить начальное значение для этого property на основе типа элемента
@@ -47,7 +49,7 @@ qx.Class.define("formgenerator.FormGenerator",
             type = this._tryGetType(currentOption);
             switch (type) {
               case "textfield":
-                //если есть дефолтное значение - устанавливаем его, иначе значение по умолчанию - null
+                //если есть пользовательское значение - устанавливаем его, иначе значение по умолчанию - null
                 if (currentOption.element.value) {
                   propertyValue = currentOption.element.value;
                 }
@@ -57,7 +59,7 @@ qx.Class.define("formgenerator.FormGenerator",
                 }
                 break;
               case "textarea":
-                //если есть дефолтное значение - устанавливаем его, иначе значение по умолчанию - null
+                //если есть пользовательское значение - устанавливаем его, иначе значение по умолчанию - null
                 if (currentOption.element.value) {
                   propertyValue = currentOption.element.value;
                 }
@@ -72,9 +74,10 @@ qx.Class.define("formgenerator.FormGenerator",
                   if (currentOption.element.value && this._inArray(currentOption.element.value, currentOption.element.data)) {
                     propertyValue = currentOption.element.value;
                   } else {
+                    //по умолчанию первый из списка
                     propertyValue = currentOption.element.data[0];
                   }
-                  //по умолчанию первый из списка
+
                   if (!this._inArray(propertyName, modelProperties)) {
                     modelSkeleton[propertyName] = propertyValue;
                     modelProperties.push(propertyName);
@@ -114,7 +117,7 @@ qx.Class.define("formgenerator.FormGenerator",
           }
         }
       }
-
+      console.log(modelSkeleton);
       this._model = qx.data.marshal.Json.createModel(modelSkeleton);
       this._controller = new qx.data.controller.Object(this._model);
     },
@@ -146,7 +149,6 @@ qx.Class.define("formgenerator.FormGenerator",
 
         for (var j = 0; j < items[i].elements.length; j++) {
           var currentOption = items[i].elements[j];
-
           //Пробуем добавить label
           //позиция label top, (если есть)
           var topPosition   = currentOption.label && currentOption.label.position && currentOption.label.position == "top";
@@ -154,7 +156,7 @@ qx.Class.define("formgenerator.FormGenerator",
           //если есть label в свойствах
           if (currentOption.label) {
             //указан ли label через объект, или нет
-            if (currentOption.label.name) {
+            if (currentOption.label.name && typeof currentOption.label.name == "string") {
               labelName = currentOption.label.name;
             } else if (typeof currentOption.label == "string") {
               labelName = currentOption.label;
