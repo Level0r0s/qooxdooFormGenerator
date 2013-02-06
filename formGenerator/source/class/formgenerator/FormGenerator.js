@@ -72,6 +72,14 @@ qx.Class.define("formgenerator.FormGenerator",
                   modelSkeleton[propertyName] = propertyValue;
                 }
                 break;
+              case "checkbox":
+                if (currentOption.element.value) //true , "true", 1 - сработают, правда и {} тоже отметит чекбокс
+                {
+                  propertyValue = 1;
+                }
+                modelSkeleton[propertyName] = propertyValue;
+                break;
+                //*************************** СЮДА НАДО ДОБАВЛЯТЬ КОД ПРИ ДОБАВЛЕНИИ НОВЫХ ЭЛЕМЕНТОВ ********************************
             }
           }
         }
@@ -248,9 +256,25 @@ qx.Class.define("formgenerator.FormGenerator",
             //биндинг
             //element.bind("modelSelection[0]", this._model, propertyName)
             //this._model.bind(propertyName, element, "modelSelection[0]");
-            this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
+            if (!this._inArray(propertyName, this._modelProperties)) {
+              this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
+              this._modelProperties.push(propertyName);
+            }
           }
 
+          break;
+        case "checkbox":
+          element = this._createCheckbox();
+          if (!this._inArray(propertyName, this._modelProperties)) {
+            var okModel2CheckBox = {converter: function(data) {
+              return data === 1;
+            }}
+            var okCheckBox2Model = {converter: function(data) {
+              return data ? 1 : 0;
+            }}
+            this._controller.addTarget(element, "value", propertyName, true, okModel2CheckBox, okCheckBox2Model);
+            this._modelProperties.push(propertyName);
+          }
           break;
         default:
           //если не получилось определить тип - возвращаем пусто
@@ -264,6 +288,9 @@ qx.Class.define("formgenerator.FormGenerator",
     },
     _createTextArea:  function() {
       return new qx.ui.form.TextArea();
+    },
+    _createCheckbox: function() {
+      return new qx.ui.form.CheckBox();
     },
     _createRadioButtonGroup: function(data) {
       var radioGroup = new qx.ui.form.RadioButtonGroup();
