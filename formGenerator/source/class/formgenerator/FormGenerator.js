@@ -157,7 +157,12 @@ qx.Class.define("formgenerator.FormGenerator",
                   else if (typeof currentOption.element.validate.funct == "string") {
                     validate = this._tryComputeValidator(currentOption.element.validate);
                     if (validate) {
-                      this._manager.add(element, validate);
+                      if (validate == "required") {
+                        element.setRequired(true);
+                        this._manager.add(element);
+                      } else {
+                        this._manager.add(element, validate);
+                      }
                     }
                   }
                 }
@@ -320,17 +325,19 @@ qx.Class.define("formgenerator.FormGenerator",
       }
       //т.к. return, break не нужен
       switch(funct) {
-        case "number" :
+        case "required":
+          return "required";
+        case "number"  :
           return qx.util.Validate.number(errorMessage);
-        case "email"  :
+        case "email"   :
           return qx.util.Validate.email(errorMessage);
-        case "string" :
+        case "string"  :
           return qx.util.Validate.string(errorMessage);
-        case "url"    :
+        case "url"     :
           return qx.util.Validate.url(errorMessage);
-        case "color"  :
+        case "color"   :
           return qx.util.Validate.color(errorMessage);
-        case "range"  :
+        case "range"   :
           if (args[0] && args[1]) {
             return qx.util.Validate.range(args[0], args[1], errorMessage);
           }

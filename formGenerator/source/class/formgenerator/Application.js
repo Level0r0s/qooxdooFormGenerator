@@ -192,6 +192,10 @@ qx.Class.define("formgenerator.Application",
               {
                 element: {type: "textfield", propertyName: "personalNumber", value: "0", validate: {funct: "regExp", args: /^[\d]+$/, errorMessage: "Only numbers are allowed"}},//regExp стандартный валидатор
                 label:   {name: "Choose your number"}
+              },
+              {
+                element: {type: "textfield", propertyName: "req", value: "0", validate: {funct: "required"}},
+                label:   {name: "Required field"}
               }
             ]
           }
