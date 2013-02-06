@@ -336,9 +336,15 @@ qx.Class.define("formgenerator.FormGenerator",
           }
           return null;
         case "inArray":
-          return qx.util.Validate.inArray(args, errorMessage);
+          if (args) {
+            return qx.util.Validate.inArray(args, errorMessage);
+          }
+          return null;
         case "regExp":
-          return qx.util.Validate.regExp(args, errorMessage);
+          if (args) {
+            return qx.util.Validate.regExp(args, errorMessage);
+          }
+          return null;
         default:
           return null
       }

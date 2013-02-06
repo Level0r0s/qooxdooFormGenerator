@@ -166,7 +166,13 @@ qx.Class.define("formgenerator.Application",
                 label:   {name: "Gender", position: "left"}
               },
               {
-                element: {type: "textarea", propertyName: "bio", value: "I am cool guy!!! :)"},
+                element: {type: "textarea", propertyName: "bio", value: "I am cool guy!!! :)", validate: {funct: function(value, item) {
+                  if (value.length > 100) {
+                    item.setInvalidMessage("No more than 100 characters, please");
+                    return false;
+                  }
+                  return true;
+                }}},
                 label:   {name: "Bio"}
               }
             ]
@@ -176,8 +182,16 @@ qx.Class.define("formgenerator.Application",
             name: "Third Column",
             elements: [
               {
-                element: {type: "textfield", propertyName: "email", value: "example@email.com", validate: {funct: "email"}},
+                element: {type: "textfield", propertyName: "email", value: "example@email.com", validate: {funct: "email", errorMessage: "Wrong email!!"}},//email, стандартный валидатор
                 label:   {name: "Email"}
+              },
+              {
+                element: {type: "textfield", propertyName: "url", value: "http://site.com", validate: {funct: "url"}},//url стандартный валидатор
+                label:   {name: "Your site"}
+              },
+              {
+                element: {type: "textfield", propertyName: "personalNumber", value: "0", validate: {funct: "regExp", args: /^[\d]+$/, errorMessage: "Only numbers are allowed"}},//regExp стандартный валидатор
+                label:   {name: "Choose your number"}
               }
             ]
           }
