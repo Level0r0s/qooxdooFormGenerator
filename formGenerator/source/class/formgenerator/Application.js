@@ -202,7 +202,7 @@ qx.Class.define("formgenerator.Application",
                 label:   {name: "Checkbox"}
               },
               {
-                element: {type: "checkboxgroup", data: [0, 1, 0, 0], propertyName: "group"},
+                element: {type: "checkboxgroup", data: [0, 1, 1, 0], propertyName: "group"},
                 label:   {name: "Group"}
               }
             ]
