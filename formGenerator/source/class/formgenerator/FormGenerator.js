@@ -254,39 +254,40 @@ qx.Class.define("formgenerator.FormGenerator",
       propertyName = this._tryGetPropertyName(currentOption);
       type         = this._tryGetType(currentOption);
 
+      //создание элемента и биндинг не произойдет, если уже был создан элемент с таким же свойством (propertyName)
       switch (type) {
         case "textfield":
-          element = this._createTextField();
-          //binding с контроллером:
           if (!this._inArray(propertyName, this._modelProperties)) {
+            element = this._createTextField();
+            //binding с контроллером:
             this._controller.addTarget(element, "value", propertyName, true);
             this._modelProperties.push(propertyName);
           }
           break;
         case "textarea":
-          element = this._createTextArea();
-          //binding с контроллером:
           if (!this._inArray(propertyName, this._modelProperties)) {
+            element = this._createTextArea();
+            //binding с контроллером:
             this._controller.addTarget(element, "value", propertyName, true);
             this._modelProperties.push(propertyName);
           }
           break;
         case "radiobuttongroup":
-          //радиогруппа требует data
-          //проведем проверку, что currentOption.data, если существует - то это массив
-          var toClass = {}.toString;
-          if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
-            element = this._createRadioButtonGroup(currentOption.element.data);
-            //биндинг
-            if (!this._inArray(propertyName, this._modelProperties)) {
+          if (!this._inArray(propertyName, this._modelProperties)) {
+            //радиогруппа требует data
+            //проведем проверку, что currentOption.data, если существует - то это массив
+            var toClass = {}.toString;
+            if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+              element = this._createRadioButtonGroup(currentOption.element.data);
+              //биндинг
               this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
               this._modelProperties.push(propertyName);
             }
           }
           break;
         case "checkbox":
-          element = this._createCheckbox();
           if (!this._inArray(propertyName, this._modelProperties)) {
+            element = this._createCheckbox();
             var model2CheckBox = {converter: function(data) {
               return data === 1;
             }}
@@ -298,24 +299,24 @@ qx.Class.define("formgenerator.FormGenerator",
           }
           break;
         case "checkboxgroup":
-          var toClass = {}.toString;
-          if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
-            element = new qx.ui.groupbox.GroupBox();
-            element.setLayout(new qx.ui.layout.VBox(10));
-              for (var i = 0; i < currentOption.element.data.length; i++) {
-                var checkbox = this._createCheckbox();
-                element.add(checkbox);
-                var model2CheckBox = {converter: function(data) {
-                   return data === 1;
-                }}
-                var checkBox2Model = {converter: function(data) {
-                   return data ? 1 : 0;
-                }}
-                if (!this._inArray(propertyName, this._modelProperties)) {
+          if (!this._inArray(propertyName, this._modelProperties)) {
+            var toClass = {}.toString;
+            if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+              element = new qx.ui.groupbox.GroupBox();
+              element.setLayout(new qx.ui.layout.VBox(10));
+                for (var i = 0; i < currentOption.element.data.length; i++) {
+                  var checkbox = this._createCheckbox();
+                  element.add(checkbox);
+                  var model2CheckBox = {converter: function(data) {
+                     return data === 1;
+                  }}
+                  var checkBox2Model = {converter: function(data) {
+                     return data ? 1 : 0;
+                  }}
                   this._controller.addTarget(checkbox, "value", propertyName + "[" + i + "]", true, model2CheckBox, checkBox2Model);
                 }
-              }
               this._modelProperties.push(propertyName);
+            }
           }
           break;
         default:
