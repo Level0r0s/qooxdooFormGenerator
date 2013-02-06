@@ -200,6 +200,10 @@ qx.Class.define("formgenerator.Application",
               {
                 element: {type: "checkbox", value: 1, validate: {funct: "required"}},
                 label:   {name: "Checkbox"}
+              },
+              {
+                element: {type: "checkboxgroup", data: [0, 1, 0, 0], propertyName: "group"},
+                label:   {name: "Group"}
               }
             ]
           }

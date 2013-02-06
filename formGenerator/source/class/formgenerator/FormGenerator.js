@@ -79,6 +79,21 @@ qx.Class.define("formgenerator.FormGenerator",
                 }
                 modelSkeleton[propertyName] = propertyValue;
                 break;
+              case "checkboxgroup":
+                if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+                  propertyValue = [];
+                  for (var k = 0; k < currentOption.element.data.length; k++) {
+                    if (currentOption.element.data[k]) {
+                      propertyValue.push(1);
+                    }
+                    else {
+                      propertyValue.push(0);
+                    }
+                  }
+                  console.log(propertyValue);
+                  modelSkeleton[propertyName] = propertyValue;
+                }
+                break;
                 //*************************** СЮДА НАДО ДОБАВЛЯТЬ КОД ПРИ ДОБАВЛЕНИИ НОВЫХ ЭЛЕМЕНТОВ ********************************
             }
           }
@@ -274,6 +289,28 @@ qx.Class.define("formgenerator.FormGenerator",
             }}
             this._controller.addTarget(element, "value", propertyName, true, okModel2CheckBox, okCheckBox2Model);
             this._modelProperties.push(propertyName);
+          }
+          break;
+        case "checkboxgroup":
+          var toClass = {}.toString;
+          if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+            element = new qx.ui.groupbox.GroupBox();
+            element.setLayout(new qx.ui.layout.VBox(10));
+            if (!this._inArray(propertyName, this._modelProperties)) {
+              for (var i = 0; i < currentOption.element.data.length; i++) {
+                var checkbox = this._createCheckbox();
+                console.log(checkbox);
+                element.add(checkbox);
+                var okModel2CheckBox = {converter: function(data) {
+                   return data === 1;
+                }}
+                var okCheckBox2Model = {converter: function(data) {
+                   return data ? 1 : 0;
+                }}
+                this._controller.addTarget(checkbox, "value", propertyName + "[" + i + "]", true, okModel2CheckBox, okCheckBox2Model);
+              }
+              this._modelProperties.push(propertyName);
+            }
           }
           break;
         default:

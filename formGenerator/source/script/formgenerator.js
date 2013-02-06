@@ -19,7 +19,7 @@ qx.$$packageData = {};
 
 qx.$$loader = {
   parts : {"boot":[0]},
-  packages : {"0":{"uris":["__out__:formgenerator.48ac1db90ac5.js","formgenerator:formgenerator/Application.js","__out__:formgenerator.8a71ecec6b09.js","formgenerator:formgenerator/FormGenerator.js","__out__:formgenerator.7859c5ddd89c.js","formgenerator:formgenerator/theme/Font.js","__out__:formgenerator.e817a3214337.js","formgenerator:formgenerator/theme/Decoration.js","__out__:formgenerator.4372d2ea3388.js","formgenerator:formgenerator/theme/Appearance.js","__out__:formgenerator.8d1cd0aecd61.js","formgenerator:formgenerator/theme/Color.js","formgenerator:formgenerator/theme/Theme.js"]}},
+  packages : {"0":{"uris":["__out__:formgenerator.48ac1db90ac5.js","formgenerator:formgenerator/Application.js","__out__:formgenerator.8a71ecec6b09.js","formgenerator:formgenerator/FormGenerator.js","__out__:formgenerator.bc172be0db54.js","formgenerator:formgenerator/theme/Font.js","__out__:formgenerator.e817a3214337.js","formgenerator:formgenerator/theme/Decoration.js","__out__:formgenerator.4372d2ea3388.js","formgenerator:formgenerator/theme/Appearance.js","__out__:formgenerator.8d1cd0aecd61.js","formgenerator:formgenerator/theme/Color.js","formgenerator:formgenerator/theme/Theme.js"]}},
   urisBefore : [],
   cssBefore : [],
   boot : "boot",
