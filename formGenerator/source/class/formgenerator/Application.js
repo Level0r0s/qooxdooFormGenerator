@@ -162,7 +162,7 @@ qx.Class.define("formgenerator.Application",
             name: "Second Column",
             elements: [
               {
-                element: {type: "radiobuttongroup", data: ["Male", "Female"], propertyName: "gender", value: "Female"},
+                element: {type: "radiobuttongroup", data: ["Male", "Female"], propertyName: "gender", value: "Female", options: {width: 100}},
                 label:   {name: "Gender", position: "left"}
               },
               {
@@ -182,7 +182,7 @@ qx.Class.define("formgenerator.Application",
             name: "Third Column",
             elements: [
               {
-                element: {type: "textfield", propertyName: "email", value: "example@email.com", validate: {funct: "email", errorMessage: "Wrong email!!"}},//email, стандартный валидатор
+                element: {type: "textfield", propertyName: "email", value: "example@email.com", validate: {funct: "email", errorMessage: "Wrong email!!"}, options: {width: 150}},//email, стандартный валидатор
                 label:   {name: "Email"}
               },
               {
@@ -206,8 +206,18 @@ qx.Class.define("formgenerator.Application",
               //  label:   {name: "Group"}
               //},
               {
-                element: {type: "checkboxgroup", data: [0, 1, 1, 0], propertyName: "group"},
+                element: {type: "checkboxgroup", data: [{label: "a", value: 0}, {label: "b", value : 1}, {label: "c", value : 1}, {label: "d", value : 1}], propertyName: "group"},
                 label:   {name: "Group"}
+              }
+            ]
+          },
+          //4 колонка
+          {
+            name: "Fourth column",
+            elements: [
+              {
+                element: {type: "select", propertyName: "selectGender", data: ["--Select--","Male", "Female", "Unknown"], validate: {funct: function(value, item) {console.log(value); return false;}}},
+                label:   {name: "Gender"}
               }
             ]
           }

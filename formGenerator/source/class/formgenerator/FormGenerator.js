@@ -84,6 +84,22 @@ qx.Class.define("formgenerator.FormGenerator",
                   }
                 }
                 break;
+              case "select":
+                var toClass = {}.toString;
+                if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+                  if (currentOption.element.value && this._inArray(currentOption.element.value, currentOption.element.data)) {
+                    propertyValue = currentOption.element.value;
+                  } else {
+                    //по умолчанию первый из списка
+                    propertyValue = currentOption.element.data[0];
+                  }
+
+                  if (!this._inArray(propertyName, modelProperties)) {
+                    modelSkeleton[propertyName] = propertyValue;
+                    modelProperties.push(propertyName);
+                  }
+                }
+                break;
               case "checkbox":
                 if (currentOption.element.value) //true , "true", 1 - сработают, правда и {} тоже отметит чекбокс
                 {
@@ -99,7 +115,11 @@ qx.Class.define("formgenerator.FormGenerator",
                   propertyValue = [];
                   for (var k = 0; k < currentOption.element.data.length; k++) {
                     if (currentOption.element.data[k]) {
-                      propertyValue.push(1);
+                      if (currentOption.element.data[k].value !== undefined) {
+                        propertyValue.push(currentOption.element.data[k].value);
+                      } else {
+                        propertyValue.push(1);
+                      }
                     }
                     else {
                       propertyValue.push(0);
@@ -180,7 +200,7 @@ qx.Class.define("formgenerator.FormGenerator",
           if (currentOption.element) {
             //если есть имя label или указан propertyName, то создаем элемент
             if (labelName != null || currentOption.element.propertyName) {
-              //Внутри ф-ции создания элемента делается binding с моделью, если получается создать элемент
+              //Внутри ф-ции создания элемента делается binding с моделью (если, конечно элемент создастся) , если получается создать элемент
               var element = this._createElement(currentOption);
 
               //если все хорошо, применяем валидацию, если есть, и добавляем элемент
@@ -260,7 +280,7 @@ qx.Class.define("formgenerator.FormGenerator",
       switch (type) {
         case "textfield":
           if (!this._inArray(propertyName, this._modelProperties)) {
-            element = this._createTextField();
+            element = this._createTextField(currentOption.element.options);
             //binding с контроллером:
             this._controller.addTarget(element, "value", propertyName, true);
             this._modelProperties.push(propertyName);
@@ -268,7 +288,7 @@ qx.Class.define("formgenerator.FormGenerator",
           break;
         case "textarea":
           if (!this._inArray(propertyName, this._modelProperties)) {
-            element = this._createTextArea();
+            element = this._createTextArea(currentOption.element.options);
             //binding с контроллером:
             this._controller.addTarget(element, "value", propertyName, true);
             this._modelProperties.push(propertyName);
@@ -280,7 +300,20 @@ qx.Class.define("formgenerator.FormGenerator",
             //проведем проверку, что currentOption.data, если существует - то это массив
             var toClass = {}.toString;
             if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
-              element = this._createRadioButtonGroup(currentOption.element.data);
+              element = this._createRadioButtonGroup(currentOption.element.data, currentOption.element.options);
+              //биндинг
+              this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
+              this._modelProperties.push(propertyName);
+            }
+          }
+          break;
+        case "select":
+          if (!this._inArray(propertyName, this._modelProperties)) {
+            //select требует data
+            //проведем проверку, что currentOption.data, если существует - то это массив
+            var toClass = {}.toString;
+            if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+              element = this._createSelect(currentOption.element.data, currentOption.element.options);
               //биндинг
               this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
               this._modelProperties.push(propertyName);
@@ -305,9 +338,12 @@ qx.Class.define("formgenerator.FormGenerator",
             var toClass = {}.toString;
             if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
               element = new qx.ui.groupbox.GroupBox();
+              if (currentOption.element.options) {
+                element.set(currentOption.element.options);
+              }
               element.setLayout(new qx.ui.layout.VBox(10));
                 for (var i = 0; i < currentOption.element.data.length; i++) {
-                  var checkbox = this._createCheckbox();
+                  var checkbox = this._createCheckbox(currentOption.element.data[i].label);
                   element.add(checkbox);
                   var model2CheckBox = {converter: function(data) {
                      return data === 1;
@@ -328,23 +364,42 @@ qx.Class.define("formgenerator.FormGenerator",
       }
       return element;
     },
-    _createTextField: function() {
+    _createTextField: function(options) {
+      if (options) {
+        return new qx.ui.form.TextField().set(options);
+      }
       return new qx.ui.form.TextField();
     },
-    _createTextArea:  function() {
+    _createTextArea:  function(options) {
+      if (options) {
+        return new qx.ui.form.TextArea.set(options);
+      }
       return new qx.ui.form.TextArea();
     },
-    _createCheckbox: function() {
-      return new qx.ui.form.CheckBox();
+    _createCheckbox: function(label) {
+      return new qx.ui.form.CheckBox(label);
     },
-    _createRadioButtonGroup: function(data) {
+    _createRadioButtonGroup: function(data, options) {
       var radioGroup = new qx.ui.form.RadioButtonGroup();
+      if (options) {
+        radioGroup.set(options);
+      }
       for (var i = 0; i < data.length; i++) {
         var radioButton = new qx.ui.form.RadioButton(data[i]);
         radioButton.setModel(data[i]);
         radioGroup.add(radioButton);
       }
       return radioGroup;
+    },
+    _createSelect: function(data, options) {
+      var select = new qx.ui.form.SelectBox();
+      if (options) {
+        select.set(options);
+      }
+      for (var i = 0; i < data.length; i++) {
+        select.add(new qx.ui.form.ListItem(data[i], null, data[i]));
+      }
+      return select;
     },
     //метод пытается получить свойство name для элемента
     _tryGetPropertyName: function(currentOption) {
