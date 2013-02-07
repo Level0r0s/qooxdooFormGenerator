@@ -64,19 +64,17 @@ qx.Class.define("formgenerator.FormGenerator",
             type = this._tryGetType(currentOption);
             switch (type) {
               case "textfield":
+              case "textarea" :
                 //если есть пользовательское значение - устанавливаем его, иначе значение по умолчанию - null
-                if (currentOption.element.value) {
-                  propertyValue = currentOption.element.value;
-                }
-                if (!this._inArray(propertyName, modelProperties)) {
-                  modelSkeleton[propertyName] = propertyValue;
-                  modelProperties.push(propertyName);
-                }
-                break;
-              case "textarea":
-                //если есть пользовательское значение - устанавливаем его, иначе значение по умолчанию - null
-                if (currentOption.element.value) {
-                  propertyValue = currentOption.element.value;
+                if (currentOption.element.value !== undefined) {
+                  //для textfield, если значение число - преобразуем его в строку
+                  if (typeof currentOption.element.value == "number") {
+                     currentOption.element.value += '';
+                  }
+                  //не позволим присвоить неправильное значение, например объект, присвоить можно только строку (либо число, преобразованное к строке ранее)
+                  if (typeof currentOption.element.value == "string") {
+                    propertyValue = currentOption.element.value;
+                  }
                 }
                 if (!this._inArray(propertyName, modelProperties)) {
                   modelSkeleton[propertyName] = propertyValue;
@@ -246,7 +244,7 @@ qx.Class.define("formgenerator.FormGenerator",
               //Внутри ф-ции создания элемента делается binding с моделью (если, конечно элемент создастся) , если получается создать элемент
               var element = this._createElement(currentOption);
 
-              //если все хорошо, применяем валидацию, если есть, и добавляем элемент
+              //если все хорошо добавляем элемент
               if (element != null) {
                 if (topPosition) {
                   child.add(element, {row: row, column: 0});
@@ -308,10 +306,8 @@ qx.Class.define("formgenerator.FormGenerator",
             //binding с контроллером:
             this._controller.addTarget(element, "value", propertyName, true);
             this._modelProperties.push(propertyName);
-
             //валидация
             this._standartValidate(element, currentOption);
-
           }
           break;
         case "textarea":
@@ -323,7 +319,6 @@ qx.Class.define("formgenerator.FormGenerator",
 
             //валидация
             this._standartValidate(element, currentOption);
-
           }
           break;
         case "radiobuttongroup":
@@ -425,6 +420,7 @@ qx.Class.define("formgenerator.FormGenerator",
       return element;
     },
     _validateArray: [],//массив ф-ций валидации, который будет заюзан для setValidation метода
+
     //стандартная валидация (для элементов: textfield, textarea, checkbox)
     _standartValidate: function(element, currentOption) {
       //Здесь блок валидации идет:
@@ -530,8 +526,11 @@ qx.Class.define("formgenerator.FormGenerator",
     _tryGetPropertyName: function(currentOption) {
       var propertyName = null;
       //если есть propertyName, устанавливаем его в макет будущей модели
-      if (currentOption.element && currentOption.element.propertyName) {
+      if (currentOption.element && currentOption.element.propertyName && typeof currentOption.element.propertyName == "string") {
         propertyName = currentOption.element.propertyName;
+        //обрежем теги и пробелы, если в свойство их зачем-то записали:
+        propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
+        propertyName = propertyName.replace(/\s/g, '');
       }
       //иначе пытаемся сгенерить на основе label
       else if (currentOption.label) {
