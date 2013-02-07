@@ -237,21 +237,22 @@ qx.Class.define("formgenerator.Application",
                 label:   {name: "Gender"}
               },
               {
-                element: {type: "singlelist", propertyName: "singleList", value: 0 ,data: [
+                element: {type: "singlelist", propertyName: "singleList", data: [
                   {label: "First Item",   value: 0},
                   {label: "Second Item",  value: 1},
                   {label: "Third Item",   value: 2},
-                  {label: "Fourth Item",  value: 3},
+                  {label: "Fourth Item",  value: null},
                   {label: "Fifth Item",   value: 4},
                   {label: "Sixth Item",   value: 5},
                   {label: "Seventh Item", value: 6},
-                  {label: "Eighth Item",  value: 7},
+                  {label: "Eighth Item"},
+                  10,
                   {label: "Ninth Item",   value: 8}
                 ]},
                 label: {name: "Single List"}
               },
               {
-                element: {type: "singlelist", propertyName: "singleList2", data: [
+                element: {type: "singlelist", propertyName: "singleList2", value: "Fifth Item" ,data: [
                   "First Item",
                   "Second Item",
                   "Third Item",

@@ -97,38 +97,20 @@ qx.Class.define("formgenerator.FormGenerator",
                   }
                 }
                 break;
-              case "select":
-                var toClass = {}.toString;
-                if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
-                  if (currentOption.element.value && this._inArray(currentOption.element.value, currentOption.element.data, "label")) {
-                    propertyValue = currentOption.element.value;
-                  } else {
-                    //по умолчанию первый из списка
-                    if (currentOption.element.data[0].value !== undefined) {
-                      propertyValue = currentOption.element.data[0].value;
-                    }
-                    else {
-                      propertyValue = currentOption.element.data[0];
-                    }
-                  }
-
-                  if (!this._inArray(propertyName, modelProperties)) {
-                    modelSkeleton[propertyName] = propertyValue;
-                    modelProperties.push(propertyName);
-                  }
-                }
-                break;
+              case "select"    :
               case "singlelist":
                 var toClass = {}.toString;
                 if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
-                  if ((currentOption.element.value != undefined) && this._inArray(currentOption.element.value, currentOption.element.data, "value")) {
-                    console.log("setting property value by user: " + currentOption.element.data[0].value);
+                  if ((currentOption.element.value != undefined) && this._inArray(currentOption.element.value, currentOption.element.data, "value", "label")) {
                     propertyValue = currentOption.element.value;
                   } else {
                     //по умолчанию первый из списка
-                    if (currentOption.element.data[0].value !== undefined) {
-                      console.log("setting property value: " + currentOption.element.data[0].value);
+                    //не null и не undefined
+                    if (currentOption.element.data[0].value != undefined) {
                       propertyValue = currentOption.element.data[0].value;
+                    }
+                    else if (currentOption.element.data[0].label) {
+                      propertyValue = currentOption.element.data[0].label;
                     }
                     else {
                       propertyValue = currentOption.element.data[0];
@@ -262,12 +244,14 @@ qx.Class.define("formgenerator.FormGenerator",
     _model: null,
     _controller: null,
     _manager: null,
-    _inArray: function in_array(needle, haystack, property, strict) {
+    _inArray: function in_array(needle, haystack, property, secondProperty, strict) {
       var found = false, key, strict = !!strict;
         for (key in haystack) {
           var item = haystack[key];
-          if (property && item[property] != undefined) {
+          if (property && item[property] !== undefined) {
             item = item[property];
+          } else if (secondProperty && item[secondProperty] !== undefined) {
+            item = item[secondProperty];
           }
           if ((strict && item === needle) || (!strict && item == needle)) {
             found = true;
@@ -355,7 +339,6 @@ qx.Class.define("formgenerator.FormGenerator",
           break;
         case "singlelist":
           if (!this._inArray(propertyName, this._modelProperties)) {
-            //select требует data
             //проведем проверку, что currentOption.data, если существует - то это массив
             var toClass = {}.toString;
             if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
@@ -500,9 +483,16 @@ qx.Class.define("formgenerator.FormGenerator",
         select.set(options);
       }
       for (var i = 0; i < data.length; i++) {
-        var value = (data[i].value) ? data[i].value : data[i];
+        var value = null;
+        if (data[i].value != undefined) {
+          value = data[i].value;
+        } else if (data[i].label) {
+          value = data[i].label;
+        } else {
+          value = data[i];
+        }
         var label = (data[i].label) ? data[i].label : data[i];
-
+        label += '';
         select.add(new qx.ui.form.ListItem(label, null, value));
       }
       return select;
@@ -515,9 +505,16 @@ qx.Class.define("formgenerator.FormGenerator",
         select.set(options);
       }
       for (var i = 0; i < data.length; i++) {
-        var value = (data[i].value != undefined) ? data[i].value : data[i];
+        var value = null;
+        if (data[i].value != undefined) {
+          value = data[i].value;
+        } else if (data[i].label) {
+          value = data[i].label;
+        } else {
+          value = data[i];
+        }
         var label = (data[i].label) ? data[i].label : data[i];
-
+        label += '';
         list.add(new qx.ui.form.ListItem(label, null, value));
       }
       return list;
