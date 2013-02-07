@@ -205,28 +205,6 @@ qx.Class.define("formgenerator.FormGenerator",
 
               //если все хорошо, применяем валидацию, если есть, и добавляем элемент
               if (element != null) {
-                //Здесь блок валидации идет:
-                if (currentOption.element.validate && currentOption.element.validate.funct) {
-                  var validate = null;
-                  //если свой валидатор:
-                  if (typeof currentOption.element.validate.funct == "function") {
-                    validate = currentOption.element.validate.funct;
-                    this._manager.add(element, validate);
-                  }
-                  //иначе пробуем подобрать валидатор из готового набора
-                  else if (typeof currentOption.element.validate.funct == "string") {
-                    validate = this._tryComputeValidator(currentOption.element.validate);
-                    if (validate) {
-                      if (validate == "required") {
-                        element.setRequired(true);
-                        this._manager.add(element);
-                      } else {
-                        this._manager.add(element, validate);
-                      }
-                    }
-                  }
-                }
-
                 if (topPosition) {
                   child.add(element, {row: row, column: 0});
                 }
@@ -284,6 +262,10 @@ qx.Class.define("formgenerator.FormGenerator",
             //binding с контроллером:
             this._controller.addTarget(element, "value", propertyName, true);
             this._modelProperties.push(propertyName);
+
+            //валидация
+            this._standartValidate(element, currentOption);
+
           }
           break;
         case "textarea":
@@ -292,6 +274,10 @@ qx.Class.define("formgenerator.FormGenerator",
             //binding с контроллером:
             this._controller.addTarget(element, "value", propertyName, true);
             this._modelProperties.push(propertyName);
+
+            //валидация
+            this._standartValidate(element, currentOption);
+
           }
           break;
         case "radiobuttongroup":
@@ -304,6 +290,10 @@ qx.Class.define("formgenerator.FormGenerator",
               //биндинг
               this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
               this._modelProperties.push(propertyName);
+
+              //валидация
+              this._standartValidate(element, currentOption);
+
             }
           }
           break;
@@ -331,6 +321,9 @@ qx.Class.define("formgenerator.FormGenerator",
             }}
             this._controller.addTarget(element, "value", propertyName, true, model2CheckBox, checkBox2Model);
             this._modelProperties.push(propertyName);
+
+            //валидация
+            this._standartValidate(element, currentOption);
           }
           break;
         case "checkboxgroup":
@@ -342,18 +335,20 @@ qx.Class.define("formgenerator.FormGenerator",
                 element.set(currentOption.element.options);
               }
               element.setLayout(new qx.ui.layout.VBox(10));
-                for (var i = 0; i < currentOption.element.data.length; i++) {
-                  var checkbox = this._createCheckbox(currentOption.element.data[i].label);
-                  element.add(checkbox);
-                  var model2CheckBox = {converter: function(data) {
-                     return data === 1;
-                  }}
-                  var checkBox2Model = {converter: function(data) {
-                     return data ? 1 : 0;
-                  }}
-                  this._controller.addTarget(checkbox, "value", propertyName + "[" + i + "]", true, model2CheckBox, checkBox2Model);
-                }
+              for (var i = 0; i < currentOption.element.data.length; i++) {
+                var checkbox = this._createCheckbox(currentOption.element.data[i].label);
+                element.add(checkbox);
+                var model2CheckBox = {converter: function(data) {
+                  return data === 1;
+                }}
+                var checkBox2Model = {converter: function(data) {
+                  return data ? 1 : 0;
+                }}
+                this._controller.addTarget(checkbox, "value", propertyName + "[" + i + "]", true, model2CheckBox, checkBox2Model);
+              }
               this._modelProperties.push(propertyName);
+              this._checkboxGroupValidate(element, currentOption);
+
             }
           }
           break;
@@ -363,6 +358,40 @@ qx.Class.define("formgenerator.FormGenerator",
           break;
       }
       return element;
+    },
+    //стандартная валидация (для элементов: textfield, textarea, checkbox)
+    _standartValidate: function(element, currentOption) {
+      //Здесь блок валидации идет:
+      if (currentOption.element.validate && currentOption.element.validate.funct) {
+        var validate = null;
+        //если свой валидатор:
+        if (typeof currentOption.element.validate.funct == "function") {
+          validate = currentOption.element.validate.funct;
+          this._manager.add(element, validate);
+        }
+        //иначе пробуем подобрать валидатор из готового набора
+        else if (typeof currentOption.element.validate.funct == "string") {
+          validate = this._tryComputeValidator(currentOption.element.validate);
+          if (validate) {
+            if (validate == "required") {
+              element.setRequired(true);
+              this._manager.add(element);
+            } else {
+              this._manager.add(element, validate);
+            }
+          }
+        }
+      }
+      //конец блока валидации
+    },
+    _checkboxGroupValidate: function(element, currentOption) {
+      //Здесь блок валидации идет, позволен только пользовательский валидатор , element - это checkbox group
+      if (currentOption.element.validate && currentOption.element.validate.funct) {
+        var checkboxes = element.getChildren();
+        this._manager.setValidator(
+          currentOption.element.validate.funct.bind(null, checkboxes)
+        );
+      }
     },
     _createTextField: function(options) {
       if (options) {
