@@ -384,14 +384,18 @@ qx.Class.define("formgenerator.FormGenerator",
       }
       //конец блока валидации
     },
+    //валидатор для группы чекбоксов
     _checkboxGroupValidate: function(element, currentOption) {
       //Здесь блок валидации идет, позволен только пользовательский валидатор , element - это checkbox group
       if (currentOption.element.validate && currentOption.element.validate.funct) {
         var checkboxes = element.getChildren();
         this._manager.setValidator(
-          currentOption.element.validate.funct.bind(null, checkboxes)
+          currentOption.element.validate.funct.bind(null, currentOption.element, checkboxes)
         );
       }
+    },
+    _selectValidate: function(element, currentOption) {
+
     },
     _createTextField: function(options) {
       if (options) {
