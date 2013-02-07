@@ -112,6 +112,8 @@ qx.Class.define("formgenerator.FormGenerator",
                 if (currentOption.element.value) //true , "true", 1 - сработают, правда и {} тоже отметит чекбокс
                 {
                   propertyValue = 1;
+                } else {
+                  propertyValue = 0;
                 }
                 if (!this._inArray(propertyName, modelProperties)) {
                   modelSkeleton[propertyName] = propertyValue;
@@ -339,7 +341,7 @@ qx.Class.define("formgenerator.FormGenerator",
           break;
         case "checkbox":
           if (!this._inArray(propertyName, this._modelProperties)) {
-            element = this._createCheckbox();
+            element = this._createCheckbox(currentOption.element.label);
             var model2CheckBox = {converter: function(data) {
               return data === 1;
             }}
