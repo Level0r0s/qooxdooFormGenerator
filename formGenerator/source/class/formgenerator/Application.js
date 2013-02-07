@@ -226,7 +226,7 @@ qx.Class.define("formgenerator.Application",
             name: "Fourth column",
             elements: [
               {
-                element: {type: "select", propertyName: "selectGender", data: ["--Select--","Male", "Female", "Unknown"], validate: {
+                element: {type: "select", propertyName: "selectGender", data: [{label: "--Select--", value: "--Select--"},"Male", {label: "Female", value: "Female"}, {label: "Unknown", value: "Unknown"}]/*data: ["--Select--","Male", "Female", "Unknown"]*/, value: "Male", validate: {
                   funct: function(select) {
                     if (select.getSelection()[0].getModel() == "--Select--") {
                       return false;
@@ -235,6 +235,34 @@ qx.Class.define("formgenerator.Application",
                     }
                 }},
                 label:   {name: "Gender"}
+              },
+              {
+                element: {type: "singlelist", propertyName: "singleList", value: 0 ,data: [
+                  {label: "First Item",   value: 0},
+                  {label: "Second Item",  value: 1},
+                  {label: "Third Item",   value: 2},
+                  {label: "Fourth Item",  value: 3},
+                  {label: "Fifth Item",   value: 4},
+                  {label: "Sixth Item",   value: 5},
+                  {label: "Seventh Item", value: 6},
+                  {label: "Eighth Item",  value: 7},
+                  {label: "Ninth Item",   value: 8}
+                ]},
+                label: {name: "Single List"}
+              },
+              {
+                element: {type: "singlelist", propertyName: "singleList2", data: [
+                  "First Item",
+                  "Second Item",
+                  "Third Item",
+                  "Fourth Item",
+                  "Fifth Item",
+                  "Sixth Item",
+                  "Seventh Item",
+                  "Eighth Item",
+                  "Ninth Item"
+                ]},
+                label: {name: "Single List 2"}
               }
             ]
           }

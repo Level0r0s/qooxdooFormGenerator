@@ -27,7 +27,7 @@ qx.Class.define("formgenerator.FormGenerator",
         }
         return true;
       }
-
+      //либо замыкание, либо биндинг (в смысле привязка к контексту, а не биндинг qooxdoo), решил через биндинг сделать
       this._manager.setValidator(allValidateFunctions.bind(this));
     }
 
@@ -102,11 +102,39 @@ qx.Class.define("formgenerator.FormGenerator",
               case "select":
                 var toClass = {}.toString;
                 if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
-                  if (currentOption.element.value && this._inArray(currentOption.element.value, currentOption.element.data)) {
+                  if (currentOption.element.value && this._inArray(currentOption.element.value, currentOption.element.data, "label")) {
                     propertyValue = currentOption.element.value;
                   } else {
                     //по умолчанию первый из списка
-                    propertyValue = currentOption.element.data[0];
+                    if (currentOption.element.data[0].value !== undefined) {
+                      propertyValue = currentOption.element.data[0].value;
+                    }
+                    else {
+                      propertyValue = currentOption.element.data[0];
+                    }
+                  }
+
+                  if (!this._inArray(propertyName, modelProperties)) {
+                    modelSkeleton[propertyName] = propertyValue;
+                    modelProperties.push(propertyName);
+                  }
+                }
+                break;
+              case "singlelist":
+                var toClass = {}.toString;
+                if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+                  if ((currentOption.element.value != undefined) && this._inArray(currentOption.element.value, currentOption.element.data, "value")) {
+                    console.log("setting property value by user: " + currentOption.element.data[0].value);
+                    propertyValue = currentOption.element.value;
+                  } else {
+                    //по умолчанию первый из списка
+                    if (currentOption.element.data[0].value !== undefined) {
+                      console.log("setting property value: " + currentOption.element.data[0].value);
+                      propertyValue = currentOption.element.data[0].value;
+                    }
+                    else {
+                      propertyValue = currentOption.element.data[0];
+                    }
                   }
 
                   if (!this._inArray(propertyName, modelProperties)) {
@@ -236,11 +264,14 @@ qx.Class.define("formgenerator.FormGenerator",
     _model: null,
     _controller: null,
     _manager: null,
-    _inArray: function in_array(needle, haystack, strict) { // Checks if a value exists in an array
-      // + original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    _inArray: function in_array(needle, haystack, property, strict) {
       var found = false, key, strict = !!strict;
         for (key in haystack) {
-          if ((strict && haystack[key] === needle) || (!strict && haystack[key] == needle)) {
+          var item = haystack[key];
+          if (property && item[property] != undefined) {
+            item = item[property];
+          }
+          if ((strict && item === needle) || (!strict && item == needle)) {
             found = true;
             break;
           }
@@ -324,6 +355,23 @@ qx.Class.define("formgenerator.FormGenerator",
               this._modelProperties.push(propertyName);
 
               this._selectValidate(element, currentOption);
+            }
+          }
+          break;
+        case "singlelist":
+          if (!this._inArray(propertyName, this._modelProperties)) {
+            //select требует data
+            //проведем проверку, что currentOption.data, если существует - то это массив
+            var toClass = {}.toString;
+            if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+              element = this._createSingleList(currentOption.element.data, currentOption.element.options);
+              //биндинг
+
+              this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
+              this._modelProperties.push(propertyName);
+
+              //валидация ниже
+              //this._selectValidate(element, currentOption);
             }
           }
           break;
@@ -456,9 +504,27 @@ qx.Class.define("formgenerator.FormGenerator",
         select.set(options);
       }
       for (var i = 0; i < data.length; i++) {
-        select.add(new qx.ui.form.ListItem(data[i], null, data[i]));
+        var value = (data[i].value) ? data[i].value : data[i];
+        var label = (data[i].label) ? data[i].label : data[i];
+
+        select.add(new qx.ui.form.ListItem(label, null, value));
       }
       return select;
+    },
+    _createSingleList: function(data, options) {
+      var list = new qx.ui.form.List();
+      list.set({selectionMode : "single"});
+
+      if (options) {
+        select.set(options);
+      }
+      for (var i = 0; i < data.length; i++) {
+        var value = (data[i].value != undefined) ? data[i].value : data[i];
+        var label = (data[i].label) ? data[i].label : data[i];
+
+        list.add(new qx.ui.form.ListItem(label, null, value));
+      }
+      return list;
     },
     //метод пытается получить свойство name для элемента
     _tryGetPropertyName: function(currentOption) {
