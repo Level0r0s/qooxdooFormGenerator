@@ -208,15 +208,15 @@ qx.Class.define("formgenerator.Application",
               {
                 element: {type: "checkboxgroup", data: [{label: "a", value: 0}, {label: "b", value : 1}, {label: "c", value : 1}, {label: "d", value : 1}], propertyName: "group",
                 validate: {
-                  funct: function(checkboxesGroup ,checkboxes, formItems) {
+                  funct: function(checkboxesGroup ,checkboxes) {
                     if (checkboxes[0].getValue() && checkboxes[1].getValue() && !checkboxes[2].getValue()) {
                       return true;
                     } else {
+                      checkboxesGroup.setInvalidMessage("BTFD");
                       return false;
                     }
-                    }
                   }
-                },
+                }},
                 label:   {name: "Group"}
               }
             ]
@@ -227,14 +227,11 @@ qx.Class.define("formgenerator.Application",
             elements: [
               {
                 element: {type: "select", propertyName: "selectGender", data: ["--Select--","Male", "Female", "Unknown"], validate: {
-                  //чекбоксы можно получить через массив children
-                  funct: function(children) {
-                    console.log('arguments:');
-                    console.log(arguments);
-                    if (children[0].getValue() && children[1].getValue()) {
-                      return true;
-                    }
+                  funct: function(select) {
+                    if (select.getSelection()[0].getModel() == "--Select--") {
                       return false;
+                    }
+                      return true;
                     }
                 }},
                 label:   {name: "Gender"}

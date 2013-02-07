@@ -16,6 +16,21 @@ qx.Class.define("formgenerator.FormGenerator",
     //заполним форму элементами, и сделаем binding с моделью
     this._createFormItems(options);
 
+    //setValidate сделаем
+    if (this._validateArray.length) {
+      var allValidateFunctions = function() {
+        for (var i = 0; i < this._validateArray.length; i++) {
+          var returnVal =  this._validateArray[i]();
+          if (!returnVal) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      this._manager.setValidator(allValidateFunctions.bind(this));
+    }
+
     //создадим кнопки
     this._createButtons(options);
 
@@ -307,6 +322,8 @@ qx.Class.define("formgenerator.FormGenerator",
               //биндинг
               this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
               this._modelProperties.push(propertyName);
+
+              this._selectValidate(element, currentOption);
             }
           }
           break;
@@ -359,6 +376,7 @@ qx.Class.define("formgenerator.FormGenerator",
       }
       return element;
     },
+    _validateArray: [],//массив ф-ций валидации, который будет заюзан для setValidation метода
     //стандартная валидация (для элементов: textfield, textarea, checkbox)
     _standartValidate: function(element, currentOption) {
       //Здесь блок валидации идет:
@@ -389,13 +407,21 @@ qx.Class.define("formgenerator.FormGenerator",
       //Здесь блок валидации идет, позволен только пользовательский валидатор , element - это checkbox group
       if (currentOption.element.validate && currentOption.element.validate.funct) {
         var checkboxes = element.getChildren();
-        this._manager.setValidator(
-          currentOption.element.validate.funct.bind(null, currentOption.element, checkboxes)
-        );
+        //this._manager.setValidator(
+        //  currentOption.element.validate.funct.bind(null, element, checkboxes)
+        //);
+        //копим валидаторы
+        this._validateArray.push(currentOption.element.validate.funct.bind(null, element, checkboxes));
       }
     },
     _selectValidate: function(element, currentOption) {
-
+      if (currentOption.element.validate && currentOption.element.validate.funct) {
+        //this._manager.setValidator(
+        //  currentOption.element.validate.funct.bind(null, element)
+        //);
+        //копим валидаторы
+        this._validateArray.push(currentOption.element.validate.funct.bind(null, element));
+      }
     },
     _createTextField: function(options) {
       if (options) {
