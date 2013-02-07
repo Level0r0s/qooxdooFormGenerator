@@ -82,23 +82,8 @@ qx.Class.define("formgenerator.FormGenerator",
                 }
                 break;
               case "radiobuttongroup":
-                var toClass = {}.toString;
-                if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
-                  if (currentOption.element.value && this._inArray(currentOption.element.value, currentOption.element.data)) {
-                    propertyValue = currentOption.element.value;
-                  } else {
-                    //по умолчанию первый из списка
-                    propertyValue = currentOption.element.data[0];
-                  }
-
-                  if (!this._inArray(propertyName, modelProperties)) {
-                    modelSkeleton[propertyName] = propertyValue;
-                    modelProperties.push(propertyName);
-                  }
-                }
-                break;
-              case "select"    :
-              case "singlelist":
+              case "select"          :
+              case "singlelist"      :
                 var toClass = {}.toString;
                 if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
                   if ((currentOption.element.value != undefined) && this._inArray(currentOption.element.value, currentOption.element.data, "value", "label")) {
@@ -318,7 +303,6 @@ qx.Class.define("formgenerator.FormGenerator",
 
               //валидация
               this._standartValidate(element, currentOption);
-
             }
           }
           break;
@@ -471,8 +455,18 @@ qx.Class.define("formgenerator.FormGenerator",
         radioGroup.set(options);
       }
       for (var i = 0; i < data.length; i++) {
-        var radioButton = new qx.ui.form.RadioButton(data[i]);
-        radioButton.setModel(data[i]);
+        var value = null;
+        if (data[i].value != undefined) {
+          value = data[i].value;
+        } else if (data[i].label) {
+          value = data[i].label;
+        } else {
+          value = data[i];
+        }
+        var label = (data[i].label) ? data[i].label : data[i];
+        label += '';
+        var radioButton = new qx.ui.form.RadioButton(label);
+        radioButton.setModel(value);
         radioGroup.add(radioButton);
       }
       return radioGroup;

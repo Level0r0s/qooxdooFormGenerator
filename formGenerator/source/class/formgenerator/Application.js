@@ -166,6 +166,10 @@ qx.Class.define("formgenerator.Application",
                 label:   {name: "Gender", position: "left"}
               },
               {
+                element: {type: "radiobuttongroup", data: [{label: "label1", value: "Male"}, {label: "label2", value: "Female"}], propertyName: "gender2"},
+                label:   {name: "Gender 2"}
+              },
+              {
                 element: {type: "textarea", propertyName: "bio", value: "I am cool guy!!! :)", validate: {funct: function(value, item) {
                   if (value.length > 100) {
                     item.setInvalidMessage("No more than 100 characters, please");
