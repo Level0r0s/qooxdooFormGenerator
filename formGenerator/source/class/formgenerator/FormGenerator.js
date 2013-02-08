@@ -556,15 +556,59 @@ qx.Class.define("formgenerator.FormGenerator",
       return new qx.ui.form.CheckBox(label);
     },
     _createSelectionElement: function(data, options, type) {
+      var element = null;
       switch (type) {
         case "radiobuttongroup":
-          return this._createRadioButtonGroup(data, options);
+          element = new qx.ui.form.RadioButtonGroup();
+          break;
+        case "select":
+          element = new qx.ui.form.SelectBox();
+          break;
+        case "singlelist":
+          element = new qx.ui.form.List();
+          element.set({selectionMode : "single"});
+          break;
+      }
+
+      for (var i = 0; i < data.length; i++) {
+        var value = null;
+        if (data[i].value != undefined) {
+          value = data[i].value;
+        } else if (data[i].label) {
+          value = data[i].label;
+        } else {
+          value = data[i];
+        }
+        var label = (data[i].label) ? data[i].label : data[i];
+        label += '';
+        switch (type) {
+          case "radiobuttongroup" :
+            var radioButton = new qx.ui.form.RadioButton(label);
+            radioButton.setModel(value);
+            element.add(radioButton);
+            break;
+          case "select"          :
+          case "singlelist"      :
+            element.add(new qx.ui.form.ListItem(label, null, value));
+            break;
+        }
+      }
+      return element;
+      /*
+      //старый метод - можно заменить код выше и раскомментить старые методы(_createRadioButtonGroup, _createSelect, _createSingleList), должно работать
+      switch (type) {
+        case "radiobuttongroup":
+          return this._createRadioButton(data, options);
         case "select":
           return this._createSelect(data, options);
         case "singlelist":
           return this._createSingleList(data, options);
       }
+      */
     },
+
+    /*
+    //старые методы
     _createRadioButtonGroup: function(data, options) {
       var radioGroup = new qx.ui.form.RadioButtonGroup();
       if (options) {
@@ -628,7 +672,7 @@ qx.Class.define("formgenerator.FormGenerator",
         list.add(new qx.ui.form.ListItem(label, null, value));
       }
       return list;
-    },
+    },*/
     //метод пытается получить свойство name для элемента
     _tryGetPropertyName: function(currentOption) {
       var propertyName = null;
