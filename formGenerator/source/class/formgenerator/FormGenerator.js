@@ -75,19 +75,22 @@ qx.Class.define("formgenerator.FormGenerator",
 
           //теперь, если свойство propertyName есть -> пытаемся сгенерить начальное значение для этого property на основе типа элемента
           if (propertyName && currentOption.element) {
+
+            var element = currentOption.element;
+
             type = this._tryGetType(currentOption);
             switch (type) {
               case "textfield":
               case "textarea" :
                 //если есть пользовательское значение - устанавливаем его, иначе значение по умолчанию - null
-                if (currentOption.element.value !== undefined) {
+                if (element.value !== undefined) {
                   //для textfield, если значение число - преобразуем его в строку
-                  if (typeof currentOption.element.value == "number") {
-                     currentOption.element.value += '';
+                  if (typeof element.value == "number") {
+                     element.value += '';
                   }
                   //не позволим присвоить неправильное значение, например объект, присвоить можно только строку (либо число, преобразованное к строке ранее)
-                  if (typeof currentOption.element.value == "string") {
-                    propertyValue = currentOption.element.value;
+                  if (typeof element.value == "string") {
+                    propertyValue = element.value;
                   }
                 }
                 if (!this._inArray(propertyName, modelProperties)) {
@@ -97,9 +100,9 @@ qx.Class.define("formgenerator.FormGenerator",
                 break;
               case "range":
                 propertyValue = ["0", "0"];
-                if (this._isArray(currentOption.element.data)) {
-                  var from = (currentOption.element.data[0]) ? currentOption.element.data[0] : 0;
-                  var to   = (currentOption.element.data[1]) ? currentOption.element.data[1] : 0;
+                if (this._isArray(element.data)) {
+                  var from = (element.data[0]) ? element.data[0] : 0;
+                  var to   = (element.data[1]) ? element.data[1] : 0;
                   from     = (typeof from == "number") ? from + "" : from;
                   to       = (typeof to   == "number") ? to   + "" : to;
                   if (typeof from == "string") {
@@ -121,20 +124,20 @@ qx.Class.define("formgenerator.FormGenerator",
               case "radiobuttongroup":
               case "select"          :
               case "singlelist"      :
-                if (this._isArray(currentOption.element.data)) {
-                  if ((currentOption.element.value != undefined) && this._inArray(currentOption.element.value, currentOption.element.data, "value", "label")) {
-                    propertyValue = currentOption.element.value;
+                if (this._isArray(element.data)) {
+                  if ((element.value != undefined) && this._inArray(element.value, element.data, "value", "label")) {
+                    propertyValue = element.value;
                   } else {
                     //по умолчанию первый из списка
                     //не null и не undefined
-                    if (currentOption.element.data[0].value != undefined) {
-                      propertyValue = currentOption.element.data[0].value;
+                    if (element.data[0].value != undefined) {
+                      propertyValue = element.data[0].value;
                     }
-                    else if (currentOption.element.data[0].label) {
-                      propertyValue = currentOption.element.data[0].label;
+                    else if (element.data[0].label) {
+                      propertyValue = element.data[0].label;
                     }
                     else {
-                      propertyValue = currentOption.element.data[0];
+                      propertyValue = element.data[0];
                     }
                   }
 
@@ -145,7 +148,7 @@ qx.Class.define("formgenerator.FormGenerator",
                 }
                 break;
               case "multilist":
-                if (this._isArray(currentOption.element.data)) {
+                if (this._isArray(element.data)) {
                   propertyValue = null;
                   //"Грязный код" :(
                   //тупо в лоб назначили свойство null, а установим его на этапе создания multiple list, уже после биндинга через setSelection
@@ -156,7 +159,7 @@ qx.Class.define("formgenerator.FormGenerator",
                 }
                 break;
               case "checkbox":
-                if (currentOption.element.value) //true , "true", 1 - сработают, правда и {} тоже отметит чекбокс
+                if (element.value) //true , "true", 1 - сработают, правда и {} тоже отметит чекбокс
                 {
                   propertyValue = 1;
                 } else {
@@ -168,12 +171,12 @@ qx.Class.define("formgenerator.FormGenerator",
                 }
                 break;
               case "checkboxgroup":
-                if (this._isArray(currentOption.element.data)) {
+                if (this._isArray(element.data)) {
                   propertyValue = [];
-                  for (var k = 0; k < currentOption.element.data.length; k++) {
-                    if (currentOption.element.data[k]) {
-                      if (currentOption.element.data[k].value != undefined) {
-                        propertyValue.push(+!!currentOption.element.data[k].value);
+                  for (var k = 0; k < element.data.length; k++) {
+                    if (element.data[k]) {
+                      if (element.data[k].value != undefined) {
+                        propertyValue.push(+!!element.data[k].value);
                       } else {
                         propertyValue.push(1);
                       }
@@ -189,7 +192,6 @@ qx.Class.define("formgenerator.FormGenerator",
                   }
                 }
                 break;
-
             }
           }
         }
