@@ -335,9 +335,10 @@ qx.Class.define("formgenerator.Application",
           }
         ],
         buttons: [
+          //this в callback - это объект FormGenerator
           {text: "Save",   callback: function() {
-            if (this._manager.validate()) {
-              alert("You are saving: " + qx.util.Serializer.toJson(this._model));
+            if (this.getManager().validate()) {
+              alert("You are saving: " + qx.util.Serializer.toJson(this.getModel()));
             } else {
               alert('WROOONG!!! :)');
             }

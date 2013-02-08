@@ -40,6 +40,10 @@ qx.Class.define("formgenerator.FormGenerator",
     this.set({decorator: border, padding: 5, minHeight: 100, minWidth: 100, backgroundColor: "white"});
   },
   members: {
+    //паблик методы
+    getModel: function() { return this._model; },
+    getManager: function() { return this._manager; },
+    //протектед методы/свойства
     //создание модели с данными из формы
     //значения по умолчанию, если они допустимы (например для радиогруппы возможно значение из дискретного набора), то они установятся значениями модели.
     _createModel: function(options) {
@@ -638,8 +642,7 @@ qx.Class.define("formgenerator.FormGenerator",
       if (currentOption.element && currentOption.element.propertyName && typeof currentOption.element.propertyName == "string") {
         propertyName = currentOption.element.propertyName;
         //обрежем теги и пробелы, если в свойство их зачем-то записали:
-        propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
-        propertyName = propertyName.replace(/\s/g, '');
+        propertyName = propertyName.replace(/<\/?[^>]+>|\s/g,'');
       }
       //иначе пытаемся сгенерить на основе label
       else if (currentOption.label) {
