@@ -321,7 +321,6 @@ qx.Class.define("formgenerator.FormGenerator",
       //пытаемся определить propertyName и type
       propertyName = this._tryGetPropertyName(currentOption);
       type         = this._tryGetType(currentOption);
-
       //создание элемента и биндинг не произойдет, если уже был создан элемент с таким же свойством (propertyName)
       switch (type) {
         case "textfield":
@@ -340,7 +339,6 @@ qx.Class.define("formgenerator.FormGenerator",
             //binding с контроллером:
             this._controller.addTarget(element, "value", propertyName, true);
             this._modelProperties.push(propertyName);
-
             //валидация
             this._standartValidate(element, currentOption);
           }
@@ -349,7 +347,7 @@ qx.Class.define("formgenerator.FormGenerator",
           if (!this._inArray(propertyName, this._modelProperties)) {
             element = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
 
-            //конвертеры
+            //конвертеры, первый необязателен,т.к. не конвертирует ничего :), но оставлю
             var model2Textfield = {converter: function(data) {
               return data;
             }};
@@ -379,46 +377,20 @@ qx.Class.define("formgenerator.FormGenerator",
             this._rangeValidate(element, textfieldFirst, textfieldSecond, currentOption);
           }
           break;
-        case "radiobuttongroup":
-          if (!this._inArray(propertyName, this._modelProperties)) {
-            //радиогруппа требует data
-            //проведем проверку, что currentOption.data, если существует - то это массив
-            if (this._isArray(currentOption.element.data)) {
-              element = this._createRadioButtonGroup(currentOption.element.data, currentOption.element.options);
-              //биндинг
-              this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
-              this._modelProperties.push(propertyName);
-
-              //при необходимости можно добавить валидацию
-            }
-          }
-          break;
-        case "select":
-          if (!this._inArray(propertyName, this._modelProperties)) {
-            //select требует data
-            //проведем проверку, что currentOption.data, если существует - то это массив
-            if (this._isArray(currentOption.element.data)) {
-              element = this._createSelect(currentOption.element.data, currentOption.element.options);
-              //биндинг
-              this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
-              this._modelProperties.push(propertyName);
-
-              this._selectValidate(element, currentOption);
-            }
-          }
-          break;
-        case "singlelist":
+        case "radiobuttongroup" :
+        case "select"           :
+        case "singlelist"       :
           if (!this._inArray(propertyName, this._modelProperties)) {
             //проведем проверку, что currentOption.data, если существует - то это массив
             if (this._isArray(currentOption.element.data)) {
-              element = this._createSingleList(currentOption.element.data, currentOption.element.options);
+              element = this._createSelectionElement(currentOption.element.data, currentOption.element.options, type);
               //биндинг
-
               this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
               this._modelProperties.push(propertyName);
-
               //валидация ниже
-              this._selectValidate(element, currentOption);
+              if (type != "radiobuttongroup") {
+                this._selectValidate(element, currentOption);
+              }
             }
           }
           break;
@@ -582,6 +554,16 @@ qx.Class.define("formgenerator.FormGenerator",
     },
     _createCheckbox: function(label) {
       return new qx.ui.form.CheckBox(label);
+    },
+    _createSelectionElement: function(data, options, type) {
+      switch (type) {
+        case "radiobuttongroup":
+          return this._createRadioButtonGroup(data, options);
+        case "select":
+          return this._createSelect(data, options);
+        case "singlelist":
+          return this._createSingleList(data, options);
+      }
     },
     _createRadioButtonGroup: function(data, options) {
       var radioGroup = new qx.ui.form.RadioButtonGroup();
