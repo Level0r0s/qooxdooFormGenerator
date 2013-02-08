@@ -35,14 +35,24 @@ qx.Class.define("formgenerator.FormGenerator",
     this._createButtons(options);
 
     //Затем займемся внешним видом
-  	var borderColor = 'black';
-    var border = new qx.ui.decoration.Single(3, "solid", borderColor);
-    this.set({decorator: border, padding: 5, minHeight: 100, minWidth: 100, backgroundColor: "white"});
+    if (options.widget) {
+      this._setWidgetStyle(options.widget);
+    }
   },
   members: {
     //паблик методы
     getModel: function() { return this._model; },
     getManager: function() { return this._manager; },
+    _setWidgetStyle: function(widget) {
+      var options = {};
+      if (widget.options) {
+        options = widget.options;
+      }
+      if (widget.border) {
+        options.decorator = new qx.ui.decoration.Single(widget.border.width, widget.border.style , widget.border.color);
+      }
+      this.set(options);
+    },
     //протектед методы/свойства
     //создание модели с данными из формы
     //значения по умолчанию, если они допустимы (например для радиогруппы возможно значение из дискретного набора), то они установятся значениями модели.
@@ -222,7 +232,7 @@ qx.Class.define("formgenerator.FormGenerator",
           var labelName     = null;
           //если есть label в свойствах
           if (currentOption.label) {
-            //указан ли label через объект, или нет
+            //указан ли label через объект, или нет, пустую строку не считаем
             if (currentOption.label.name && typeof currentOption.label.name == "string") {
               labelName = currentOption.label.name;
             } else if (typeof currentOption.label == "string") {

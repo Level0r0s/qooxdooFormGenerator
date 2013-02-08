@@ -142,6 +142,15 @@ qx.Class.define("formgenerator.Application",
 
       //Вариант для генерации формы № 2
       var formProperties = {
+        widget: {
+          border:            {color: "black", width: 3, style: "solid"},
+          options: {
+            padding:         5,
+            minHeight:       100,
+            minWidth:        100,
+            backgroundColor: "white"
+          }
+        },
         items: [
           //1-я колонка
           {
