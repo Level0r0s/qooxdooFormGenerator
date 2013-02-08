@@ -290,14 +290,27 @@ qx.Class.define("formgenerator.Application",
                 element: {type: "multilist", propertyName: "multiList", data: [
                   {label: "First Item",   value: 0},
                   {label: "Second Item",  value: 1},
-                  {label: "Third Item",   value: 2, set: true},
-                  {label: "Fourth Item",  value: 3, set: true},
+                  {label: "Third Item",   value: 2},
+                  {label: "Fourth Item",  value: 3},
                   {label: "Fifth Item",   value: 4},
                   {label: "Sixth Item",   value: 5},
                   {label: "Seventh Item", value: 6},
                   {label: "Eighth Item",  value: 7},
                   {label: "Ninth Item",   value: 8}
-                ]},
+                ],
+                validate: {
+                  //например не хотим, чтобы был выбран элемент 2 или 3
+                  funct: function(list) {
+                    var selection = list.getSelection();
+                    for (var i = 0; i < selection.length; i++) {
+                      if (selection[i].getModel() == 2 || selection[i].getModel() == 3) {
+                        return false;
+                      }
+                    }
+                        return true;
+                    }
+                }
+              },
                 label: {name: "multipleLabel"}
               }
             ]

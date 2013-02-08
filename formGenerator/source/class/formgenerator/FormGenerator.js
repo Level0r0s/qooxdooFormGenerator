@@ -383,13 +383,22 @@ qx.Class.define("formgenerator.FormGenerator",
                 var label = (data[i].label) ? data[i].label : data[i];
                 label += '';
                 var listItem = new qx.ui.form.ListItem(label, null, value);
+                if (!i) {
+                  var firstItem = listItem;
+                }
                 element.add(listItem);
                 if (data[i].set) {
                   itemsArray.push(listItem);
                 }
               }
-              element.setSelection(itemsArray);
+              if (itemsArray.length) {
+                element.setSelection(itemsArray);
+              } else {
+                element.setSelection([firstItem]);
+              }
 
+              //валидация ниже
+              this._selectValidate(element, currentOption);
             }
           }
           break;
@@ -474,18 +483,13 @@ qx.Class.define("formgenerator.FormGenerator",
       //Здесь блок валидации идет, позволен только пользовательский валидатор , element - это checkbox group
       if (currentOption.element.validate && currentOption.element.validate.funct) {
         var checkboxes = element.getChildren();
-        //this._manager.setValidator(
-        //  currentOption.element.validate.funct.bind(null, element, checkboxes)
-        //);
         //копим валидаторы
         this._validateArray.push(currentOption.element.validate.funct.bind(null, element, checkboxes));
       }
     },
+    //используется для валидации select/single-multiple list
     _selectValidate: function(element, currentOption) {
       if (currentOption.element.validate && currentOption.element.validate.funct) {
-        //this._manager.setValidator(
-        //  currentOption.element.validate.funct.bind(null, element)
-        //);
         //копим валидаторы
         this._validateArray.push(currentOption.element.validate.funct.bind(null, element));
       }
