@@ -314,7 +314,7 @@ qx.Class.define("formgenerator.Application",
                 label: {name: "multipleLabel"}
               },
               {
-                element: {type: "range", propertyName: "rangeProperty", data: [0, 'k24ojojj'],
+                element: {type: "range", propertyName: "rangeProperty", data: [50, 55],
                 validate: {
                   //хотим диапазон от 50 до 100
                   //element - контейнер, может и не надо его исползовать

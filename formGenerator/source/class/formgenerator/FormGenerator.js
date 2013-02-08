@@ -82,9 +82,8 @@ qx.Class.define("formgenerator.FormGenerator",
                 }
                 break;
               case "range":
-                var toClass = {}.toString;
                 propertyValue = ["0", "0"];
-                if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+                if (this._isArray(currentOption.element.data)) {
                   var from = (currentOption.element.data[0]) ? currentOption.element.data[0] : 0;
                   var to   = (currentOption.element.data[1]) ? currentOption.element.data[1] : 0;
                   from     = (typeof from == "number") ? from + "" : from;
@@ -108,8 +107,7 @@ qx.Class.define("formgenerator.FormGenerator",
               case "radiobuttongroup":
               case "select"          :
               case "singlelist"      :
-                var toClass = {}.toString;
-                if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+                if (this._isArray(currentOption.element.data)) {
                   if ((currentOption.element.value != undefined) && this._inArray(currentOption.element.value, currentOption.element.data, "value", "label")) {
                     propertyValue = currentOption.element.value;
                   } else {
@@ -133,8 +131,7 @@ qx.Class.define("formgenerator.FormGenerator",
                 }
                 break;
               case "multilist":
-                var toClass = {}.toString;
-                if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+                if (this._isArray(currentOption.element.data)) {
                   propertyValue = null;
                   //"Грязный код" :(
                   //тупо в лоб назначили свойство null, а установим его на этапе создания multiple list, уже после биндинга через setSelection
@@ -157,10 +154,8 @@ qx.Class.define("formgenerator.FormGenerator",
                 }
                 break;
               case "checkboxgroup":
-                var toClass = {}.toString;
-                if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+                if (this._isArray(currentOption.element.data)) {
                   propertyValue = [];
-
                   for (var k = 0; k < currentOption.element.data.length; k++) {
                     if (currentOption.element.data[k]) {
                       if (currentOption.element.data[k].value != undefined) {
@@ -285,6 +280,10 @@ qx.Class.define("formgenerator.FormGenerator",
         }
         return found;
     },
+    _isArray: function(data) {
+      var toClass = {}.toString;
+      return data && toClass.call(data) == "[object Array]" && data.length
+    },
     _createButtons: function(options) {
       var buttons = options.buttons;
       //Добавим кнопки
@@ -368,8 +367,7 @@ qx.Class.define("formgenerator.FormGenerator",
           if (!this._inArray(propertyName, this._modelProperties)) {
             //радиогруппа требует data
             //проведем проверку, что currentOption.data, если существует - то это массив
-            var toClass = {}.toString;
-            if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+            if (this._isArray(currentOption.element.data)) {
               element = this._createRadioButtonGroup(currentOption.element.data, currentOption.element.options);
               //биндинг
               this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
@@ -383,8 +381,7 @@ qx.Class.define("formgenerator.FormGenerator",
           if (!this._inArray(propertyName, this._modelProperties)) {
             //select требует data
             //проведем проверку, что currentOption.data, если существует - то это массив
-            var toClass = {}.toString;
-            if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+            if (this._isArray(currentOption.element.data)) {
               element = this._createSelect(currentOption.element.data, currentOption.element.options);
               //биндинг
               this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
@@ -397,8 +394,7 @@ qx.Class.define("formgenerator.FormGenerator",
         case "singlelist":
           if (!this._inArray(propertyName, this._modelProperties)) {
             //проведем проверку, что currentOption.data, если существует - то это массив
-            var toClass = {}.toString;
-            if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+            if (this._isArray(currentOption.element.data)) {
               element = this._createSingleList(currentOption.element.data, currentOption.element.options);
               //биндинг
 
@@ -413,8 +409,7 @@ qx.Class.define("formgenerator.FormGenerator",
         case "multilist":
           //здесь будет плохой код, так делать нехорошо, но хотя бы работает, нет времени искать как сделать лучше
           if (!this._inArray(propertyName, this._modelProperties)) {
-            var toClass = {}.toString;
-            if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+            if (this._isArray(currentOption.element.data)) {
               var itemsArray = [];
               element = new qx.ui.form.List();
               element.set({selectionMode : "multi"});
@@ -477,8 +472,7 @@ qx.Class.define("formgenerator.FormGenerator",
           break;
         case "checkboxgroup":
           if (!this._inArray(propertyName, this._modelProperties)) {
-            var toClass = {}.toString;
-            if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+            if (this._isArray(currentOption.element.data)) {
               element = new qx.ui.groupbox.GroupBox();
               if (currentOption.element.options) {
                 element.set(currentOption.element.options);
