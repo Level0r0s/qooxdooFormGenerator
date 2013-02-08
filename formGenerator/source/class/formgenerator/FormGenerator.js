@@ -334,7 +334,7 @@ qx.Class.define("formgenerator.FormGenerator",
           if (!this._inArray(propertyName, this._modelProperties)) {
             element = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
 
-            //конвертеры, только число
+            //конвертеры
             var model2Textfield = {converter: function(data) {
               return data;
             }};
@@ -349,19 +349,19 @@ qx.Class.define("formgenerator.FormGenerator",
               }
             }};
 
-            var textfield = this._createTextField(currentOption.element.options);
-            element.add(textfield);
+            var textfieldFirst = this._createTextField(currentOption.element.options);
+            element.add(textfieldFirst);
             //binding с контроллером:
-            this._controller.addTarget(textfield, "value", propertyName + "[0]", true, model2Textfield, textfield2Model);
+            this._controller.addTarget(textfieldFirst, "value", propertyName + "[0]", true, model2Textfield, textfield2Model);
 
-            textfield = this._createTextField(currentOption.element.options);
-            element.add(textfield);
+            textfieldSecond = this._createTextField(currentOption.element.options);
+            element.add(textfieldSecond);
             //binding с контроллером:
-            this._controller.addTarget(textfield, "value", propertyName + "[1]", true, model2Textfield, textfield2Model);
+            this._controller.addTarget(textfieldSecond, "value", propertyName + "[1]", true, model2Textfield, textfield2Model);
 
             this._modelProperties.push(propertyName);
             //валидация
-            //this._standartValidate(element, currentOption);
+            this._rangeValidate(element, textfieldFirst, textfieldSecond, currentOption);
           }
           break;
         case "radiobuttongroup":
@@ -375,8 +375,7 @@ qx.Class.define("formgenerator.FormGenerator",
               this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
               this._modelProperties.push(propertyName);
 
-              //валидация
-              this._standartValidate(element, currentOption);
+              //при необходимости можно добавить валидацию
             }
           }
           break;
@@ -550,6 +549,13 @@ qx.Class.define("formgenerator.FormGenerator",
       if (currentOption.element.validate && currentOption.element.validate.funct) {
         //копим валидаторы
         this._validateArray.push(currentOption.element.validate.funct.bind(null, element));
+      }
+    },
+    //для валидации диапазона
+    _rangeValidate: function(element, first, second, currentOption) {
+      if (currentOption.element.validate && currentOption.element.validate.funct) {
+        //копим валидаторы
+        this._validateArray.push(currentOption.element.validate.funct.bind(null, element, first, second));
       }
     },
     _createTextField: function(options) {

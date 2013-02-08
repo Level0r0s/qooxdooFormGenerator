@@ -314,7 +314,21 @@ qx.Class.define("formgenerator.Application",
                 label: {name: "multipleLabel"}
               },
               {
-                element: {type: "range", propertyName: "rangeProperty", data: [0, 24]},
+                element: {type: "range", propertyName: "rangeProperty", data: [0, 'k24ojojj'],
+                validate: {
+                  //хотим диапазон от 50 до 100
+                  //element - контейнер, может и не надо его исползовать
+                  //first - первый текстбокс, second - второй текстбокс
+                  funct: function(element, first, second) {
+                    var firstVal  = parseInt(first.getValue(), 10);
+                    var secondVal = parseInt(second.getValue(), 10);
+                    if (firstVal >= 50 && secondVal > 50 && secondVal <= 100 ) {
+                      return true;
+                    }
+                    return false;
+                  }
+                }
+              },
                 label:   {name: "range label"}
               }
             ]
