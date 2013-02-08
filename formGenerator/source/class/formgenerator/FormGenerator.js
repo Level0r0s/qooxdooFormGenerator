@@ -645,12 +645,10 @@ qx.Class.define("formgenerator.FormGenerator",
       else if (currentOption.label) {
         if (currentOption.label.name && typeof currentOption.label.name == "string") {
           propertyName = currentOption.label.name;
-          propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
-          propertyName = propertyName.replace(/\s/g, '');
+          propertyName = propertyName.replace(/<\/?[^>]+>|\s/g,'');
         } else if (typeof currentOption.label == "string") {
           propertyName = currentOption.label;
-          propertyName = propertyName.replace(/<\/?[^>]+>/g,'');
-          propertyName = propertyName.replace(/\s/g, '');
+          propertyName = propertyName.replace(/<\/?[^>]+>|\s/g,'');
         }
       }
       return propertyName;
