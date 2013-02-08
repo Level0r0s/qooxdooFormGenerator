@@ -108,6 +108,18 @@ qx.Class.define("formgenerator.FormGenerator",
                   }
                 }
                 break;
+              case "multilist":
+                var toClass = {}.toString;
+                if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+                  propertyValue = null;
+                  //"Грязный код" :(
+                  //тупо в лоб назначили свойство null, а установим его на этапе создания multiple list, уже после биндинга через setSelection
+                  if (!this._inArray(propertyName, modelProperties)) {
+                    modelSkeleton[propertyName] = propertyValue;
+                    modelProperties.push(propertyName);
+                  }
+                }
+                break;
               case "checkbox":
                 if (currentOption.element.value) //true , "true", 1 - сработают, правда и {} тоже отметит чекбокс
                 {
@@ -121,6 +133,7 @@ qx.Class.define("formgenerator.FormGenerator",
                 }
                 break;
               case "checkboxgroup":
+                var toClass = {}.toString;
                 if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
                   propertyValue = [];
 
@@ -143,7 +156,7 @@ qx.Class.define("formgenerator.FormGenerator",
                   }
                 }
                 break;
-                //*************************** СЮДА НАДО ДОБАВЛЯТЬ КОД ПРИ ДОБАВЛЕНИИ НОВЫХ ЭЛЕМЕНТОВ ********************************
+
             }
           }
         }
@@ -337,6 +350,46 @@ qx.Class.define("formgenerator.FormGenerator",
 
               //валидация ниже
               this._selectValidate(element, currentOption);
+            }
+          }
+          break;
+        case "multilist":
+          //здесь будет плохой код, так делать нехорошо, но хотя бы работает, нет времени искать как сделать лучше
+          if (!this._inArray(propertyName, this._modelProperties)) {
+            var toClass = {}.toString;
+            if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+              var itemsArray = [];
+              element = new qx.ui.form.List();
+              element.set({selectionMode : "multi"});
+
+              //!! здесь биндинг !!
+              this._controller.addTarget(element, "modelSelection", propertyName ,true);
+              this._modelProperties.push(propertyName);
+
+              if (currentOption.element.options) {
+                element.set(currentOption.element.options);
+              }
+
+              var data = currentOption.element.data;
+              for (var i = 0; i < data.length; i++) {
+                var value = null;
+              if (data[i].value != undefined) {
+                value = data[i].value;
+              } else if (data[i].label) {
+                value = data[i].label;
+              } else {
+                value = data[i];
+              }
+                var label = (data[i].label) ? data[i].label : data[i];
+                label += '';
+                var listItem = new qx.ui.form.ListItem(label, null, value);
+                element.add(listItem);
+                if (data[i].set) {
+                  itemsArray.push(listItem);
+                }
+              }
+              element.setSelection(itemsArray);
+
             }
           }
           break;

@@ -281,6 +281,26 @@ qx.Class.define("formgenerator.Application",
                 label:   {name: "example"}
               }
             ]
+          },
+          //5 колонка
+          {
+            name: "Fifth column",
+            elements: [
+              {
+                element: {type: "multilist", propertyName: "multiList", data: [
+                  {label: "First Item",   value: 0},
+                  {label: "Second Item",  value: 1},
+                  {label: "Third Item",   value: 2, set: true},
+                  {label: "Fourth Item",  value: 3, set: true},
+                  {label: "Fifth Item",   value: 4},
+                  {label: "Sixth Item",   value: 5},
+                  {label: "Seventh Item", value: 6},
+                  {label: "Eighth Item",  value: 7},
+                  {label: "Ninth Item",   value: 8}
+                ]},
+                label: {name: "multipleLabel"}
+              }
+            ]
           }
         ],
         buttons: [
