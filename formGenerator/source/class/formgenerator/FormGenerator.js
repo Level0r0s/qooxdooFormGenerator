@@ -218,11 +218,11 @@ qx.Class.define("formgenerator.FormGenerator",
 
         //если есть заголовок, создадим его
         if (items[i].name) {
-          var label = new qx.ui.basic.Label().set({
+          var mainLabel = new qx.ui.basic.Label().set({
             value: "<b>" + items[i].name + "</b>",
             rich: true
           });
-          child.add(label, {row: row, column: 0})
+          child.add(mainLabel, {row: row, column: 0})
           row++;
         }
 
