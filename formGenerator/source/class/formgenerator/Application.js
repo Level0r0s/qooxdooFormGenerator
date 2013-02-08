@@ -210,7 +210,7 @@ qx.Class.define("formgenerator.Application",
               //  label:   {name: "Group"}
               //},
               {
-                element: {type: "checkboxgroup", data: [{label: "a", value: 1}, {label: "b", value : 1}, {label: "c", value : 0}, {label: "d", value : 1}], propertyName: "group",
+                element: {type: "checkboxgroup",data: [{label: "a", value: 1}, {label: "b", value : 1}, {label: "c", value : 0}, {label: "d", value : 1}], propertyName: "group",
                 validate: {
                   funct: function(checkboxesGroup ,checkboxes) {
                     if (checkboxes[0].getValue() && checkboxes[1].getValue() && !checkboxes[2].getValue()) {

@@ -123,10 +123,11 @@ qx.Class.define("formgenerator.FormGenerator",
               case "checkboxgroup":
                 if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
                   propertyValue = [];
+
                   for (var k = 0; k < currentOption.element.data.length; k++) {
                     if (currentOption.element.data[k]) {
-                      if (currentOption.element.data[k].value !== undefined) {
-                        propertyValue.push(currentOption.element.data[k].value);
+                      if (currentOption.element.data[k].value != undefined) {
+                        propertyValue.push(+!!currentOption.element.data[k].value);
                       } else {
                         propertyValue.push(1);
                       }
