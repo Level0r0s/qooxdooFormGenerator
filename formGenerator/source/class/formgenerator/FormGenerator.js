@@ -336,7 +336,7 @@ qx.Class.define("formgenerator.FormGenerator",
               this._modelProperties.push(propertyName);
 
               //валидация ниже
-              //this._selectValidate(element, currentOption);
+              this._selectValidate(element, currentOption);
             }
           }
           break;

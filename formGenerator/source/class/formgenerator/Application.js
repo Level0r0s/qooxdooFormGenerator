@@ -252,7 +252,15 @@ qx.Class.define("formgenerator.Application",
                   {label: "Eighth Item"},
                   10,
                   {label: "Ninth Item",   value: 8}
-                ]},
+                ],
+                validate: {
+                  funct: function(list) {
+                    if (list.getSelection()[0].getModel() == 5) {
+                      return false;
+                    }
+                      return true;
+                    }
+                }},
                 label: {name: "Single List"}
               },
               {
