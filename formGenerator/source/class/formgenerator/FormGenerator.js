@@ -81,6 +81,30 @@ qx.Class.define("formgenerator.FormGenerator",
                   modelProperties.push(propertyName);
                 }
                 break;
+              case "range":
+                var toClass = {}.toString;
+                propertyValue = ["0", "0"];
+                if (currentOption.element.data && toClass.call(currentOption.element.data) == "[object Array]" && currentOption.element.data.length) {
+                  var from = (currentOption.element.data[0]) ? currentOption.element.data[0] : 0;
+                  var to   = (currentOption.element.data[1]) ? currentOption.element.data[1] : 0;
+                  from     = (typeof from == "number") ? from + "" : from;
+                  to       = (typeof to   == "number") ? to   + "" : to;
+                  if (typeof from == "string") {
+                    propertyValue[0] = from;
+                  } else {
+                    propertyValue[0] = "0";
+                  }
+                  if (typeof to == "string") {
+                    propertyValue[1] = to;
+                  } else {
+                    propertyValue[1] = "0";
+                  }
+                }
+                if (!this._inArray(propertyName, modelProperties)) {
+                  modelSkeleton[propertyName] = propertyValue;
+                  modelProperties.push(propertyName);
+                }
+                break;
               case "radiobuttongroup":
               case "select"          :
               case "singlelist"      :
@@ -304,6 +328,40 @@ qx.Class.define("formgenerator.FormGenerator",
 
             //валидация
             this._standartValidate(element, currentOption);
+          }
+          break;
+        case "range":
+          if (!this._inArray(propertyName, this._modelProperties)) {
+            element = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
+
+            //конвертеры, только число
+            var model2Textfield = {converter: function(data) {
+              return data;
+            }};
+            var textfield2Model = {converter: function(data) {
+              var data = parseInt(data, 10);
+              data += "";
+              if (data) {
+                return data;
+              }
+              else {
+                return "0";
+              }
+            }};
+
+            var textfield = this._createTextField(currentOption.element.options);
+            element.add(textfield);
+            //binding с контроллером:
+            this._controller.addTarget(textfield, "value", propertyName + "[0]", true, model2Textfield, textfield2Model);
+
+            textfield = this._createTextField(currentOption.element.options);
+            element.add(textfield);
+            //binding с контроллером:
+            this._controller.addTarget(textfield, "value", propertyName + "[1]", true, model2Textfield, textfield2Model);
+
+            this._modelProperties.push(propertyName);
+            //валидация
+            //this._standartValidate(element, currentOption);
           }
           break;
         case "radiobuttongroup":

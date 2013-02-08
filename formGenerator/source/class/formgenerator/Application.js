@@ -312,6 +312,10 @@ qx.Class.define("formgenerator.Application",
                 }
               },
                 label: {name: "multipleLabel"}
+              },
+              {
+                element: {type: "range", propertyName: "rangeProperty", data: [0, 24]},
+                label:   {name: "range label"}
               }
             ]
           }
