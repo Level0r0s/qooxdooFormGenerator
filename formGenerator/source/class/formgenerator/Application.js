@@ -171,10 +171,11 @@ qx.Class.define("formgenerator.Application",
             name: "Second Column",
             elements: [
               {
-                element: {type: "radiobuttongroup", data: ["Unknown","Male", "Female"], propertyName: "gender", value: "Female", options: {width: 100},
+                element: {type: "radiobuttongroup", data: ["Unknown","Male", "Female"], propertyName: "gender", value: "Male", options: {width: 100},
                   validate: {
                     funct: function(radioButtonGroup) {
                       if (radioButtonGroup.getSelection()[0].getModel() == "Unknown") {
+                        this.addInvalidMessage("Gender: Gender should not be Unknown");
                         return false;
                       }
                         return true;
@@ -189,7 +190,7 @@ qx.Class.define("formgenerator.Application",
               {
                 element: {type: "textarea", propertyName: "bio", value: "I am cool guy!!! :)", validate: {funct: function(value, item) {
                   if (value.length > 100) {
-                    item.setInvalidMessage("No more than 100 characters, please");
+                    item.setInvalidMessage("Bio: No more than 100 characters, please");
                     return false;
                   }
                   return true;
@@ -203,23 +204,23 @@ qx.Class.define("formgenerator.Application",
             name: "Third Column",
             elements: [
               {
-                element: {type: "textfield", propertyName: "email", value: "example@email.com", validate: {funct: "email", errorMessage: "Wrong email!!"}, options: {width: 150}},//email, стандартный валидатор
+                element: {type: "textfield", propertyName: "email", value: "example@email.com", validate: {funct: "email", errorMessage: "Email: Wrong email!!"}, options: {width: 150}},//email, стандартный валидатор
                 label:   {name: "Email"}
               },
               {
-                element: {type: "textfield", propertyName: "url", value: "http://site.com", validate: {funct: "url"}},//url стандартный валидатор
+                element: {type: "textfield", propertyName: "url", value: "http://site.com", validate: {funct: "url", errorMessage: "Your site: is not an url"}},//url стандартный валидатор
                 label:   {name: "Your site"}
               },
               {
-                element: {type: "textfield", propertyName: "personalNumber", value: "0", validate: {funct: "regExp", args: /^[\d]+$/, errorMessage: "Only numbers are allowed"}},//regExp стандартный валидатор
+                element: {type: "textfield", propertyName: "personalNumber", value: "0", validate: {funct: "regExp", args: /^[\d]+$/, errorMessage: "Choose your number: Only numbers are allowed"}},//regExp стандартный валидатор
                 label:   {name: "Choose your number"}
               },
               {
-                element: {type: "textfield", propertyName: "req", value: "0", validate: {funct: "required"}},
+                element: {type: "textfield", propertyName: "req", value: "0", validate: {funct: "required", errorMessage: "Required field: this field is required"}},
                 label:   {name: "Required field"}
               },
               {
-                element: {type: "checkbox", value: 1, validate: {funct: "required"}},
+                element: {type: "checkbox", value: 1, validate: {funct: "required", errorMessage: "Checkbox: this field is required"}},
                 label:   {name: "Checkbox"}
               },
               //{
@@ -233,7 +234,7 @@ qx.Class.define("formgenerator.Application",
                     if (checkboxes[0].getValue() && checkboxes[1].getValue() && !checkboxes[2].getValue()) {
                       return true;
                     } else {
-                      checkboxesGroup.setInvalidMessage("BTFD");
+                      this.addInvalidMessage("Group: Please set true for checkboxes 'a' and 'b', and set false for checkbox 'c'");
                       return false;
                     }
                   }
@@ -250,6 +251,7 @@ qx.Class.define("formgenerator.Application",
                 element: {type: "select", propertyName: "selectGender", data: [{label: "--Select--", value: "--Select--"},"Male", {label: "Female", value: "Female"}, {label: "Unknown", value: "Unknown"}]/*data: ["--Select--","Male", "Female", "Unknown"]*/, value: "Male", validate: {
                   funct: function(select) {
                     if (select.getSelection()[0].getModel() == "--Select--") {
+                      this.addInvalidMessage("Gender Select: Please select another value (not --Select--)");
                       return false;
                     }
                       return true;
@@ -259,20 +261,20 @@ qx.Class.define("formgenerator.Application",
               },
               {
                 element: {type: "singlelist", propertyName: "singleList", data: [
-                  {label: "First Item",   value: 0},
-                  {label: "Second Item",  value: 1},
-                  {label: "Third Item",   value: 2},
-                  {label: "Fourth Item",  value: null},
-                  {label: "Fifth Item",   value: 4},
-                  {label: "Sixth Item",   value: 5},
-                  {label: "Seventh Item", value: 6},
-                  {label: "Eighth Item"},
-                  10,
-                  {label: "Ninth Item",   value: 8}
+                  {label: "First Item",   value: 1},
+                  {label: "Second Item",  value: 2},
+                  {label: "Third Item",   value: 3},
+                  {label: "Fourth Item",  value: 4},
+                  {label: "Fifth Item",   value: 5},
+                  {label: "Sixth Item",   value: 6},
+                  {label: "Seventh Item", value: 7},
+                  {label: "Eighth Item",  value: 8},
+                  {label: "Ninth Item",   value: 9}
                 ],
                 validate: {
                   funct: function(list) {
                     if (list.getSelection()[0].getModel() == 5) {
+                      this.addInvalidMessage("Single List: Please, dont choose 'Fifth item'");
                       return false;
                     }
                       return true;
@@ -321,6 +323,7 @@ qx.Class.define("formgenerator.Application",
                     var selection = list.getSelection();
                     for (var i = 0; i < selection.length; i++) {
                       if (selection[i].getModel() == 2 || selection[i].getModel() == 3) {
+                        this.addInvalidMessage("Multiple List: Don't choose Third or Fourth item");
                         return false;
                       }
                     }
@@ -339,9 +342,10 @@ qx.Class.define("formgenerator.Application",
                   funct: function(element, first, second) {
                     var firstVal  = parseInt(first.getValue(), 10);
                     var secondVal = parseInt(second.getValue(), 10);
-                    if (firstVal >= 50 && secondVal > 50 && secondVal <= 100 ) {
+                    if (firstVal >= 0 && firstVal <= 50 && secondVal > 50 && secondVal <= 100 ) {
                       return true;
                     }
+                    this.addInvalidMessage("Range: firstVal must be >= 0 and <= 50, second val must be > 50 and <= 100");
                     return false;
                   }
                 }
@@ -357,7 +361,8 @@ qx.Class.define("formgenerator.Application",
             if (this.getManager().validate()) {
               alert("You are saving: " + qx.util.Serializer.toJson(this.getModel()));
             } else {
-              alert('WROOONG!!! :)');
+              alert(this.getManager().getInvalidMessages().join("\n"));
+              //alert('WROOONG!!! :)');
             }
 
           }},

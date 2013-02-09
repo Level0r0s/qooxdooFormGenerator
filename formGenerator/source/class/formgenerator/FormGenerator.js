@@ -19,9 +19,15 @@ qx.Class.define("formgenerator.FormGenerator",
     //setValidate сделаем
     if (this._validateArray.length) {
       var allValidateFunctions = function() {
+        var returnedVals = [];//нужен, чтобы накопить сообщения об ошибках
         for (var i = 0; i < this._validateArray.length; i++) {
           var returnVal =  this._validateArray[i]();
-          if (!returnVal) {
+          returnedVals.push(returnVal);
+        }
+        for (var i = 0; i < returnedVals.length; i++) {
+          if (!returnedVals[i]) {
+            this._manager.setInvalidMessage(this._invalidMessages.join("\n"));
+            this._invalidMessages = [];
             return false;
           }
         }
@@ -43,6 +49,10 @@ qx.Class.define("formgenerator.FormGenerator",
     //паблик методы
     getModel: function() { return this._model; },
     getManager: function() { return this._manager; },
+    _invalidMessages: [],
+    addInvalidMessage: function(message) {
+      this._invalidMessages.push(message);
+    },
     _setWidgetStyle: function(widget) {
       var options = {};
       if (widget.options) {
@@ -140,7 +150,6 @@ qx.Class.define("formgenerator.FormGenerator",
                       propertyValue = element.data[0];
                     }
                   }
-
                   if (!this._inArray(propertyName, modelProperties)) {
                     modelSkeleton[propertyName] = propertyValue;
                     modelProperties.push(propertyName);
@@ -490,21 +499,21 @@ qx.Class.define("formgenerator.FormGenerator",
       if (currentOption.element.validate && currentOption.element.validate.funct) {
         var checkboxes = element.getChildren();
         //копим валидаторы
-        this._validateArray.push(currentOption.element.validate.funct.bind(null, element, checkboxes));
+        this._validateArray.push(currentOption.element.validate.funct.bind(this, element, checkboxes));
       }
     },
     //используется для валидации select/single-multiple list
     _selectValidate: function(element, currentOption) {
       if (currentOption.element.validate && currentOption.element.validate.funct) {
         //копим валидаторы
-        this._validateArray.push(currentOption.element.validate.funct.bind(null, element));
+        this._validateArray.push(currentOption.element.validate.funct.bind(this, element));
       }
     },
     //для валидации диапазона
     _rangeValidate: function(element, first, second, currentOption) {
       if (currentOption.element.validate && currentOption.element.validate.funct) {
         //копим валидаторы
-        this._validateArray.push(currentOption.element.validate.funct.bind(null, element, first, second));
+        this._validateArray.push(currentOption.element.validate.funct.bind(this, element, first, second));
       }
     },
     _createTextField: function(options) {
