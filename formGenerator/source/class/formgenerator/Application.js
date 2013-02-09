@@ -154,7 +154,7 @@ qx.Class.define("formgenerator.Application",
             name: "First Column",
             elements: [
               {
-                element: {type: "textfield",  propertyName: "firstName", value: "Ivan"},
+                element: {type: "textfield",  propertyName: "firstName", value: "Ivan"},//!!если не укажем propertyName - он высчитается на основе label, в данном случае будет <b>First Name</b> после обработки -> FirstName
                 label:   {name: "<b>First Name</b>", position: "top", options: {textColor: "red", rich: true}}
               },
               {
@@ -180,10 +180,10 @@ qx.Class.define("formgenerator.Application",
                   }},
                 label:   {name: "Gender", position: "left"}
               },
-              {
-                element: {type: "radiobuttongroup", data: [{label: "label1", value: "Male"}, {label: "label2", value: "Female"}], propertyName: "gender2"},
-                label:   {name: "Gender 2"}
-              },
+              //{
+              //  element: {type: "radiobuttongroup", data: [{label: "label1", value: "Male"}, {label: "label2", value: "Female"}], propertyName: "gender2"},
+              //  label:   {name: "Gender 2"}
+              //},
               {
                 element: {type: "textarea", propertyName: "bio", value: "I am cool guy!!! :)", validate: {
                   funct: function(value, item) {
@@ -295,7 +295,7 @@ qx.Class.define("formgenerator.Application",
                 label: {name: "Single List 2"}
               },
               {
-                label:   {name: "example"}
+                label:   {name: "Label without Item"}
               }
             ]
           },
@@ -349,6 +349,9 @@ qx.Class.define("formgenerator.Application",
                 }
               },
                 label:   {name: "range label"}
+              },
+              {
+                element: {type: "textfield", propertyName: "withoutLabelElement"}
               }
             ]
           }
