@@ -40,10 +40,21 @@ qx.Class.define("formgenerator.FormGenerator",
     //создадим кнопки
     this._createButtons(options);
 
+    var setup = {
+      border:  {color: "blue", width: 3, style: "solid"},
+      options: {
+        padding:         5,
+        minHeight:       150,
+        minWidth:        150,
+        backgroundColor: "yellow"
+      }
+    }
     //Затем займемся внешним видом
     if (options.widget) {
-      this._setWidgetStyle(options.widget);
+      this._copy(setup, options.widget);
     }
+    console.log(setup);
+    this._setWidgetStyle(setup);
   },
   members: {
     //паблик методы
@@ -304,6 +315,22 @@ qx.Class.define("formgenerator.FormGenerator",
           }
         }
         return found;
+    },
+    //просто расширение свойств объекта свойствами другого объекта
+    //копируем, если только оба свойства объектов строки или объекты
+    _copy: function(dst, obj) {
+      for (property in obj) {
+        if (dst[property]) {
+          //если оба свойства - объекты, рекурсивно копируем их
+          if (typeof dst[property] == "object" && typeof obj[property] == "object") {
+            this._copy(dst[property], obj[property]);
+          }
+          //иначе, если оба свойства элементарные значения и obj[property] != undefined, просто копируем их
+          else if (obj[property] != undefined && typeof dst[property] != "function" && typeof dst[property] != "object" && typeof obj[property] != "function" && typeof obj[property] != "object") {
+            dst[property] = obj[property];
+          }
+        }
+      }
     },
     _isArray: function(data) {
       var toClass = {}.toString;

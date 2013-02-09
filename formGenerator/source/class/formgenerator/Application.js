@@ -30,13 +30,26 @@ qx.Class.define("formgenerator.Application",
       /*
         Создадим объект со свойствами, которые будут определять форму:
 
+        Свойство widget - объект, определяющий стиль виджета, пример
+        widget: {
+          border:            {color: "black", width: 3, style: "solid"},
+          options: {
+            padding:         5,
+            minHeight:       100,
+            minWidth:        100,
+            backgroundColor: "white"
+          }
+        }
+        может отсутствовать, тогда применятся свойства по умолчанию
 
-        Каждый объект - характеризует одну колонку формы:
+        items - массив объектов
+
+        Каждый объект из массива items - характеризует одну колонку формы:
         Свойства объекта:
           name: - заголовок колонки,
-          варианты name:
-            1. "Main information"
-            2. может отсутствовать, тогда заголовка не будет у колонки
+            варианты name:
+              1. какая-нибудь строка, например: "Main information"
+              2. может отсутствовать, тогда заголовка не будет у колонки
           elements: - массив, определяющий элементы в колонке формы
             Каждый объект массива включает в себя:
               label: - текстовая метка
@@ -44,106 +57,90 @@ qx.Class.define("formgenerator.Application",
                 name     - текст label
                 position - позиция относительно элемента (слева или сверху)
                 options  - доп. опции
-              Варианты label:
+              Некоторые примеры label:
                 1. label: "Name" // //позиция по уолчанию будет left
                 2. label: {name: "Name"} //позиция по уолчанию будет left
                 3. label: {name: "Name", position: "top"}
-                4. label: {name: "Name", position: "left", options: {color: "red"}} //с доп. опциями, например цвет
+                4. label: {name: "<b>Name</b>", position: "left", options: {color: "red", rich: true}} //с доп. опциями, например цвет
                 5. может отсутствовать (тогда label не будет в форме)
                 6. label: {} - аналогично п.5
               element: - элемент формы, определяет параметры элемента, вставляемого в форму
               Свойства element:
-                type     - тип элемента формы
-                value    - начальное значение
-                data     - массив данных элемента (необходим, например, для группы Radio Button, или Selection List)
-              Варианты element:
+                type          - тип элемента формы
+                value         - начальное значение
+                data          - массив данных элемента (необходим, например, для группы Radio Button, или Selection List)
+                                data обычно содержит либо просто строку, как элемент, например:
+                                "First Item", тогда, например value для вновь создаваемого qx.ui.form.ListItem будет "First Item"
+                                либо более правильный вариант:
+                                {label: "First Item",   value: 1}
+
+                                для multilist возможно указать несколько элементов в положение "выбран", для этого есть доп. свойство set
+                                например:
+                                {label: "First Item",    value: 1, set: true}
+                                {label: "Second Item",   value: 2}
+                                {label: "Third Item",    value: 3}
+                                {label: "Fourth Item",   value: 4, set: true}
+                                тогда будут выбраны первый и 4-й элементы
+
+                propertyName  - имя свойства модели, с которым будет биндинг (!!! необязательно,если указан label, тогда имя свойства будет расчитывать из названия label)
+                !!! Важно:
+                имя свойства расчитывается либо на основе свойства prpertyName либо на основе имени метки,
+                если имя метки содержит теги, или пробелы, они обрезаются с помощью регулярных выражений.
+                options  - объект с различными парамертами, в нем можно, например ширину указать для элемента формы
+                validate - объект для валидации,
+                  свойства:
+                  funct - ф-ция валидации
+
+                  1. Для select, single/multi list, группы radio button первый параметр ф-ции валидации - сам элемент, и поэтому можно вытащить
+                     значение выбранного селекта/list, например так: select.getSelection()[0].getModel()
+                  2. Для checkbox group - первый параметр контейнер для чекбоксов, второй - массив чекбоксов
+                  3. Для диапазона - первый параметр контейнер, может и не надо его исползовать, пользы особо никакой,
+                     второй и третий параметры: //first - первый текстбокс, second - второй текстбокс
+
+                     Добавлять сообщение о ошибке можно с помощью публичного метода addInvalidMessage, например:
+                       this.addInvalidMessage("Single List: Please, dont choose 'Fifth item'");
+
+
+                  4. Для остальных элементов можно указать либо стандартную ф-цию менеджера валидатора qooxdoo
+                    т.е. что-то из
+                      number
+                      email
+                      url
+                      и.т.д.
+                    либо свою кастомную ф-цию, например:
+
+                    funct: function(value, item) {
+                      if (value.length > 100) {
+                        item.setInvalidMessage("Bio: No more than 100 characters, please");
+                        return false;
+                      }
+                      return true;
+                    }
+                    так же для этих елементов доступно свойство errorMessage - которое задает тип сообщения
+
+              Примеры element(только некоторые):
                 1. может отсутствовать
                 2. element: {} //аналогично п. 1
-                3. element: {type: "textfield"}
+                3. element: {type: "textfield"} // если не указан label - элемент не появится на странице
                 4. element: {type: "textfield", value: "Hello"}
                 5. element: {type: "radiobuttongroup",  value: "Female", data: ["Male", "Female"]}
 
+                ТАК ЖЕ:
                 если будут указаны неверные данные, например:
                 а) неизвестный тип элемента
                   element: {type: "superfield"}
                 б) отсутствуют необходимые данные для radiobutton
                   element: {type: "radiobuttongroup",  value: "Female"}
                 элемент создан не будет
+          buttons - кнопки формы
+            text     - текст кнопки
+            callback - ф-ция обработчик кнопки
       */
 
-
-
-
-      /*
-      //Вариант данных для генерации формы № 1.
-      //массив для single selection list
-      var listData = [];
-      for (var i = 0; i < 25; i++) {
-        listData.push("Item No " + i);
-      }
-
-      var formProperties = {
-        items:
-          [
-            {
-              elements:
-              [{
-                element: {type: "textfield", propertyName: "property1"}//т.к. нет Label свойство для связи с моделью обязательно нужно указывать
-              }, {
-                element: {type: "radiobuttongroup", data: ["Male", "Female"]},//нормально определенный элемент, свойство модели - gender
-                label:   {name: "Gender", position: "left"}
-              }, {
-                element: {type: "textfield"},
-                label:   {name: "Last Name", position: "top"}//свойство модели - будет LastName
-              }, {
-                element: {type: "textfield"},
-                label:   "Country"//"плохо" определенный label, своство модели будет - Country
-              }, {
-                element: {type: "textfield"},
-                label:   {name: "<b>City</b>", options: {textColor: "red", rich: true}}//label с options, свойство модели - City (теги и пробелы обрезаются)
-              }, {
-                element: {type: "abracadabra"},//элемент с неизвестным типом, не создастся
-                label:   {name: "simple label"}//свойство модели - simplelabel
-              }, {
-                element: {type: "textfield"},//т.к. неправильно определен label, и нет свойства propertyName - мы не можем определить свойство модели => элемент создан не будет
-                label:   {name111: "fff"}//неправильный label, с непонятным свойством
-              }, {
-                element: {type: "radiobuttongroup", data: {}},//радиогруппа с неправильным свойством data не отобразится
-                label:   "wrong radiogroup"
-              }, {
-                element: "textfield",
-                label:   "lastLabel"
-              }, {
-                element: "textfield"//нет label и не указано свойство propertyName => не получается создать элемент
-              }, {
-                label: "sync_master"
-              }]
-          },
-          {
-            name: "Second column",
-            elements:
-            [{
-              element: "textfield",
-              label:   "Additional information"
-            }, {
-              element: "textarea",
-              label:   "Bio"
-            }, {
-              element: "textfield",
-              label:   "lastLabel"//перезапишется property модели
-            }]
-          }],
-        buttons: [
-          {text: "Save",   callback: function() {alert("You are saving: " + qx.util.Serializer.toJson(this._model));}},
-          {text: "Cancel", callback: function() {alert("Cancel");}}
-        ]
-      };
-      */
-
-      //Вариант для генерации формы № 2
+      //Вариант для генерации формы № 1
       var formProperties = {
         widget: {
-          border:            {color: "black", width: 3, style: "solid"},
+          border:  {color: "black", width: 3, style: "solid"},
           options: {
             padding:         5,
             minHeight:       100,
@@ -158,7 +155,7 @@ qx.Class.define("formgenerator.Application",
             elements: [
               {
                 element: {type: "textfield",  propertyName: "firstName", value: "Ivan"},
-                label:   {name: "First Name", position: "top", options: {textColor: "red", rich: true}}
+                label:   {name: "<b>First Name</b>", position: "top", options: {textColor: "red", rich: true}}
               },
               {
                 element: {type: "textfield", propertyName: "lastName", value: "Golubev"},
@@ -188,12 +185,13 @@ qx.Class.define("formgenerator.Application",
                 label:   {name: "Gender 2"}
               },
               {
-                element: {type: "textarea", propertyName: "bio", value: "I am cool guy!!! :)", validate: {funct: function(value, item) {
-                  if (value.length > 100) {
-                    item.setInvalidMessage("Bio: No more than 100 characters, please");
-                    return false;
-                  }
-                  return true;
+                element: {type: "textarea", propertyName: "bio", value: "I am cool guy!!! :)", validate: {
+                  funct: function(value, item) {
+                    if (value.length > 100) {
+                      item.setInvalidMessage("Bio: No more than 100 characters, please");
+                      return false;
+                    }
+                    return true;
                 }}},
                 label:   {name: "Bio"}
               }
@@ -307,15 +305,15 @@ qx.Class.define("formgenerator.Application",
             elements: [
               {
                 element: {type: "multilist", propertyName: "multiList", data: [
-                  {label: "First Item",   value: 0},
-                  {label: "Second Item",  value: 1},
-                  {label: "Third Item",   value: 2, set: true},
-                  {label: "Fourth Item",  value: 3, set: true},
-                  {label: "Fifth Item",   value: 4},
-                  {label: "Sixth Item",   value: 5},
-                  {label: "Seventh Item", value: 6},
-                  {label: "Eighth Item",  value: 7},
-                  {label: "Ninth Item",   value: 8}
+                  {label: "First Item",   value: 1},
+                  {label: "Second Item",  value: 2},
+                  {label: "Third Item",   value: 3},
+                  {label: "Fourth Item",  value: 4},
+                  {label: "Fifth Item",   value: 5},
+                  {label: "Sixth Item",   value: 6},
+                  {label: "Seventh Item", value: 7},
+                  {label: "Eighth Item",  value: 8},
+                  {label: "Ninth Item",   value: 9}
                 ],
                 validate: {
                   //например не хотим, чтобы был выбран элемент 2 или 3
@@ -323,7 +321,7 @@ qx.Class.define("formgenerator.Application",
                     var selection = list.getSelection();
                     for (var i = 0; i < selection.length; i++) {
                       if (selection[i].getModel() == 2 || selection[i].getModel() == 3) {
-                        this.addInvalidMessage("Multiple List: Don't choose Third or Fourth item");
+                        this.addInvalidMessage("Multiple List: Don't choose Second or Third item");
                         return false;
                       }
                     }
@@ -370,8 +368,94 @@ qx.Class.define("formgenerator.Application",
         ]
       };
 
+
+
+
+
+
+
+      /*
+      //Вариант данных для генерации формы № 2.
+      //массив для single selection list
+      var listData = [];
+      for (var i = 0; i < 25; i++) {
+        listData.push("Item No " + i);
+      }
+
+      var formProperties = {
+        items:
+          [
+            {
+              elements:
+              [{
+                element: {type: "textfield", propertyName: "property1"}//т.к. нет Label свойство для связи с моделью обязательно нужно указывать
+              }, {
+                element: {type: "radiobuttongroup", data: ["Male", "Female"]},//нормально определенный элемент, свойство модели - gender
+                label:   {name: "Gender", position: "left"}
+              }, {
+                element: {type: "textfield"},
+                label:   {name: "Last Name", position: "top"}//свойство модели - будет LastName
+              }, {
+                element: {type: "textfield"},
+                label:   "Country"//"плохо" определенный label, своство модели будет - Country
+              }, {
+                element: {type: "textfield"},
+                label:   {name: "<b>City</b>", options: {textColor: "red", rich: true}}//label с options, свойство модели - City (теги и пробелы обрезаются)
+              }, {
+                element: {type: "abracadabra"},//элемент с неизвестным типом, не создастся
+                label:   {name: "simple label"}//свойство модели - simplelabel
+              }, {
+                element: {type: "textfield"},//т.к. неправильно определен label, и нет свойства propertyName - мы не можем определить свойство модели => элемент создан не будет
+                label:   {name111: "fff"}//неправильный label, с непонятным свойством
+              }, {
+                element: {type: "radiobuttongroup", data: {}},//радиогруппа с неправильным свойством data не отобразится
+                label:   "wrong radiogroup"
+              }, {
+                element: "textfield",
+                label:   "lastLabel"
+              }, {
+                element: "textfield"//нет label и не указано свойство propertyName => не получается создать элемент
+              }, {
+                label: "sync_master"
+              }]
+          },
+          {
+            name: "Second column",
+            elements:
+            [{
+              element: "textfield",
+              label:   "Additional information"
+            }, {
+              element: "textarea",
+              label:   "Bio"
+            }, {
+              element: "textfield",
+              label:   "lastLabel"//перезапишется property модели
+            }]
+          }],
+        buttons: [
+          {text: "Save",   callback: function() {alert("You are saving: " + qx.util.Serializer.toJson(this._model));}},
+          {text: "Cancel", callback: function() {alert("Cancel");}}
+        ]
+      };
+      */
+
+
+
+
+
+
+
+
+
+
+
       var formGenerator = new formgenerator.FormGenerator(formProperties);
       this.getRoot().add(formGenerator, {top: 10, left:10});
+
     }
   }
 });
+
+
+
