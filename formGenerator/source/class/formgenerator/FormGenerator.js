@@ -52,7 +52,6 @@ qx.Class.define("formgenerator.FormGenerator",
     if (options.widget) {
       this._copy(setup, options.widget);
     }
-    console.log(setup);
     this._setWidgetStyle(setup);
   },
   members: {
@@ -352,6 +351,9 @@ qx.Class.define("formgenerator.FormGenerator",
         child = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
         for (var i = 0; i < buttons.length; i++) {
           var button = new qx.ui.form.Button(buttons[i].text);
+          if (buttons[i].options) {
+            button.set(buttons[i].options);
+          }
           button.addListener("execute", buttons[i].callback, this);
           child.add(button);
         }

@@ -368,8 +368,8 @@ qx.Class.define("formgenerator.Application",
               //alert('WROOONG!!! :)');
             }
 
-          }},
-          {text: "Cancel", callback: function() {alert("Cancel");}}
+          }, options: {width: 150}},
+          {text: "Cancel", callback: function() {alert("Cancel");}, options: {width: 150}}
         ]
       };
 
