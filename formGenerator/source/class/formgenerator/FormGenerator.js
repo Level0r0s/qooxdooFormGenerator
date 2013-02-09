@@ -386,19 +386,17 @@ qx.Class.define("formgenerator.FormGenerator",
               //биндинг
               this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
               this._modelProperties.push(propertyName);
-              //валидация ниже (пока для radio button не будем делать)
-              if (type != "radiobuttongroup") {
-                this._selectValidate(element, currentOption);
-              }
+              //валидация ниже
+              this._selectValidate(element, currentOption);
             }
           }
           break;
+        //в принципе, можно добавить в case выше, но не обязательно
         case "multilist":
-          //здесь будет плохой код, так делать нехорошо, но хотя бы работает, нет времени искать как сделать лучше
           if (!this._inArray(propertyName, this._modelProperties)) {
             if (this._isArray(currentOption.element.data)) {
 
-              element = this._createSelectionElement(currentOption.element.data, currentOption.element.options, "multilist");
+              element = this._createSelectionElement(currentOption.element.data, currentOption.element.options, type);
 
               //!! здесь биндинг !!
               this._controller.addTarget(element, "modelSelection", propertyName ,true);
@@ -409,7 +407,6 @@ qx.Class.define("formgenerator.FormGenerator",
               } else {
                 element.setSelection([element.getUserData("firstItem")]);
               }
-
               //валидация ниже
               this._selectValidate(element, currentOption);
             }

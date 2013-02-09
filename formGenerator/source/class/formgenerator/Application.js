@@ -171,7 +171,15 @@ qx.Class.define("formgenerator.Application",
             name: "Second Column",
             elements: [
               {
-                element: {type: "radiobuttongroup", data: ["Male", "Female"], propertyName: "gender", value: "Female", options: {width: 100}},
+                element: {type: "radiobuttongroup", data: ["Unknown","Male", "Female"], propertyName: "gender", value: "Female", options: {width: 100},
+                  validate: {
+                    funct: function(radioButtonGroup) {
+                      if (radioButtonGroup.getSelection()[0].getModel() == "Unknown") {
+                        return false;
+                      }
+                        return true;
+                    }
+                  }},
                 label:   {name: "Gender", position: "left"}
               },
               {
@@ -299,8 +307,8 @@ qx.Class.define("formgenerator.Application",
                 element: {type: "multilist", propertyName: "multiList", data: [
                   {label: "First Item",   value: 0},
                   {label: "Second Item",  value: 1},
-                  {label: "Third Item",   value: 2},
-                  {label: "Fourth Item",  value: 3},
+                  {label: "Third Item",   value: 2, set: true},
+                  {label: "Fourth Item",  value: 3, set: true},
                   {label: "Fifth Item",   value: 4},
                   {label: "Sixth Item",   value: 5},
                   {label: "Seventh Item", value: 6},
