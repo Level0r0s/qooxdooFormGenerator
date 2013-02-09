@@ -62,7 +62,13 @@ qx.Class.define("formgenerator.FormGenerator",
     addInvalidMessage: function(message) {
       this._invalidMessages.push(message);
     },
-    //протектед
+    //протектед свойства
+    _model:           null,
+    _controller:      null,
+    _manager:         null,
+    _modelProperties: [],//нужен, чтобы исключить биндинг двух элементов с одинаковым label на одну модель, т.е. в такой "плохой" ситуации забиндится только первый элемент
+    _validateArray:   [],//массив ф-ций валидации, который будет заюзан для setValidation метода
+    //протектед методы
     _setWidgetStyle: function(widget) {
       var options = {};
       if (widget.options) {
@@ -294,9 +300,6 @@ qx.Class.define("formgenerator.FormGenerator",
         }
       }
     },
-    _model: null,
-    _controller: null,
-    _manager: null,
     _inArray: function (needle, haystack, property, secondProperty, strict) {
       var found = false, key, strict = !!strict;
         for (key in haystack) {
@@ -360,7 +363,6 @@ qx.Class.define("formgenerator.FormGenerator",
         this._add(child, {row: 1, column: 0, colSpan: 2});
       }
     },
-    _modelProperties: [],//нужен, чтобы исключить биндинг двух элементов с одинаковым label на одну модель, т.е. в такой "плохой" ситуации забиндится только первый элемент
     _createElement: function(currentOption) {
       var propertyName = null;
       var type         = null;
@@ -504,8 +506,6 @@ qx.Class.define("formgenerator.FormGenerator",
       }
       return element;
     },
-    _validateArray: [],//массив ф-ций валидации, который будет заюзан для setValidation метода
-
     //стандартная валидация (для элементов: textfield, textarea, checkbox)
     _standartValidate: function(element, currentOption) {
       //Здесь блок валидации идет:

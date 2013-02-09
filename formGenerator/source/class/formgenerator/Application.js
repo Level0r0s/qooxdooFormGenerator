@@ -311,9 +311,9 @@ qx.Class.define("formgenerator.Application",
                   {label: "Second Item",  value: 2},
                   {label: "Third Item",   value: 3},
                   {label: "Fourth Item",  value: 4},
-                  {label: "Fifth Item",   value: 5},
-                  {label: "Sixth Item",   value: 6},
-                  {label: "Seventh Item", value: 7},
+                  {label: "Fifth Item",   value: 5, set: true},
+                  {label: "Sixth Item",   value: 6, set: true},
+                  {label: "Seventh Item", value: 7, set: true},
                   {label: "Eighth Item",  value: 8},
                   {label: "Ninth Item",   value: 9}
                 ],
@@ -353,7 +353,7 @@ qx.Class.define("formgenerator.Application",
                 label:   {name: "range label"}
               },
               {
-                element: {type: "textfield", propertyName: "withoutLabelElement"}
+                element: {type: "textfield", propertyName: "withoutLabelElement", value: "form element without label"}
               }
             ]
           }
