@@ -345,8 +345,7 @@ qx.Class.define("formgenerator.FormGenerator",
           break;
         case "range":
           if (!this._inArray(propertyName, this._modelProperties)) {
-            element = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
-
+            element = this._createRange();
             //конвертеры, первый необязателен,т.к. не конвертирует ничего :), но оставлю
             var model2Textfield = {converter: function(data) {
               return data;
@@ -387,7 +386,7 @@ qx.Class.define("formgenerator.FormGenerator",
               //биндинг
               this._controller.addTarget(element, "modelSelection[0]", propertyName, true);
               this._modelProperties.push(propertyName);
-              //валидация ниже
+              //валидация ниже (пока для radio button не будем делать)
               if (type != "radiobuttongroup") {
                 this._selectValidate(element, currentOption);
               }
@@ -398,43 +397,17 @@ qx.Class.define("formgenerator.FormGenerator",
           //здесь будет плохой код, так делать нехорошо, но хотя бы работает, нет времени искать как сделать лучше
           if (!this._inArray(propertyName, this._modelProperties)) {
             if (this._isArray(currentOption.element.data)) {
-              var itemsArray = [];
-              element = new qx.ui.form.List();
-              element.set({selectionMode : "multi"});
+
+              element = this._createSelectionElement(currentOption.element.data, currentOption.element.options, "multilist");
 
               //!! здесь биндинг !!
               this._controller.addTarget(element, "modelSelection", propertyName ,true);
               this._modelProperties.push(propertyName);
 
-              if (currentOption.element.options) {
-                element.set(currentOption.element.options);
-              }
-
-              var data = currentOption.element.data;
-              for (var i = 0; i < data.length; i++) {
-                var value = null;
-              if (data[i].value != undefined) {
-                value = data[i].value;
-              } else if (data[i].label) {
-                value = data[i].label;
+              if (element.getUserData("itemsArray").length) {
+                element.setSelection(element.getUserData("itemsArray"));
               } else {
-                value = data[i];
-              }
-                var label = (data[i].label) ? data[i].label : data[i];
-                label += '';
-                var listItem = new qx.ui.form.ListItem(label, null, value);
-                if (!i) {
-                  var firstItem = listItem;
-                }
-                element.add(listItem);
-                if (data[i].set) {
-                  itemsArray.push(listItem);
-                }
-              }
-              if (itemsArray.length) {
-                element.setSelection(itemsArray);
-              } else {
-                element.setSelection([firstItem]);
+                element.setSelection([element.getUserData("firstItem")]);
               }
 
               //валидация ниже
@@ -461,10 +434,7 @@ qx.Class.define("formgenerator.FormGenerator",
         case "checkboxgroup":
           if (!this._inArray(propertyName, this._modelProperties)) {
             if (this._isArray(currentOption.element.data)) {
-              element = new qx.ui.groupbox.GroupBox();
-              if (currentOption.element.options) {
-                element.set(currentOption.element.options);
-              }
+              element = this._createCheckboxGroup(currentOption.element.options);
               element.setLayout(new qx.ui.layout.VBox(10));
               for (var i = 0; i < currentOption.element.data.length; i++) {
                 var checkbox = this._createCheckbox(currentOption.element.data[i].label);
@@ -555,6 +525,15 @@ qx.Class.define("formgenerator.FormGenerator",
     _createCheckbox: function(label) {
       return new qx.ui.form.CheckBox(label);
     },
+    _createCheckboxGroup: function(options) {
+      if (options) {
+        return new qx.ui.groupbox.GroupBox().set(options);
+      }
+      return new qx.ui.groupbox.GroupBox();
+    },
+    _createRange: function() {
+      return new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
+    },
     _createSelectionElement: function(data, options, type) {
       var element = null;
       switch (type) {
@@ -567,6 +546,12 @@ qx.Class.define("formgenerator.FormGenerator",
         case "singlelist":
           element = new qx.ui.form.List();
           element.set({selectionMode : "single"});
+          break;
+        case "multilist":
+          //var itemsArray = [];
+          element = new qx.ui.form.List();
+          element.set({selectionMode : "multi"});
+          element.setUserData("itemsArray", []);
           break;
       }
 
@@ -591,6 +576,15 @@ qx.Class.define("formgenerator.FormGenerator",
           case "singlelist"      :
             element.add(new qx.ui.form.ListItem(label, null, value));
             break;
+          case "multilist"       :
+            var listItem = new qx.ui.form.ListItem(label, null, value);
+            if (!i) {
+              element.setUserData("firstItem", listItem);
+            }
+            element.add(listItem);
+            if (data[i].set) {
+              element.getUserData("itemsArray").push(listItem);
+            }
         }
       }
       return element;
