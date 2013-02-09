@@ -2,7 +2,6 @@ qx.Class.define("formgenerator.FormGenerator",
 {
   extend : qx.ui.core.Widget,
   construct : function(options) {
-  	//console.log(options);
 
   	this.base(arguments);
 
@@ -64,6 +63,7 @@ qx.Class.define("formgenerator.FormGenerator",
     addInvalidMessage: function(message) {
       this._invalidMessages.push(message);
     },
+    //протектед
     _setWidgetStyle: function(widget) {
       var options = {};
       if (widget.options) {
@@ -74,7 +74,6 @@ qx.Class.define("formgenerator.FormGenerator",
       }
       this.set(options);
     },
-    //протектед методы/свойства
     //создание модели с данными из формы
     //значения по умолчанию, если они допустимы (например для радиогруппы возможно значение из дискретного набора), то они установятся значениями модели.
     _createModel: function(options) {
@@ -205,7 +204,6 @@ qx.Class.define("formgenerator.FormGenerator",
                       propertyValue.push(0);
                     }
                   }
-                  //console.log(propertyValue);
                   if (!this._inArray(propertyName, modelProperties)) {
                     modelSkeleton[propertyName] = propertyValue;
                     modelProperties.push(propertyName);
@@ -300,7 +298,7 @@ qx.Class.define("formgenerator.FormGenerator",
     _model: null,
     _controller: null,
     _manager: null,
-    _inArray: function in_array(needle, haystack, property, secondProperty, strict) {
+    _inArray: function (needle, haystack, property, secondProperty, strict) {
       var found = false, key, strict = !!strict;
         for (key in haystack) {
           var item = haystack[key];
@@ -334,7 +332,18 @@ qx.Class.define("formgenerator.FormGenerator",
     },
     _isArray: function(data) {
       var toClass = {}.toString;
-      return data && toClass.call(data) == "[object Array]" && data.length
+      if (data && toClass.call(data) == "[object Array]" && data.length) {
+        //предварительно очистим массив от null и undefined
+        var i = data.length - 1;
+        while(i != -1) {
+          if (data[i] == undefined) {
+            data.splice(i, 1);
+          }
+          i--;
+        }
+        return data.length;
+      }
+      return false;
     },
     _createButtons: function(options) {
       var buttons = options.buttons;
@@ -597,7 +606,15 @@ qx.Class.define("formgenerator.FormGenerator",
         } else {
           value = data[i];
         }
-        var label = (data[i].label) ? data[i].label : data[i];
+        var label = null;
+        if (data[i].label) {
+          label = data[i].label;
+        } else if (data[i].value != undefined) {
+          label = data[i].value;
+        } else {
+          label = data[i];
+        }
+
         label += '';
         switch (type) {
           case "radiobuttongroup" :

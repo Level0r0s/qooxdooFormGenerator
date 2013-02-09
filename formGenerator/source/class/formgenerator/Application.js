@@ -138,7 +138,7 @@ qx.Class.define("formgenerator.Application",
       */
 
 
-      /*
+
       //Вариант для генерации формы № 1
       var formProperties = {
         widget: {
@@ -373,10 +373,10 @@ qx.Class.define("formgenerator.Application",
         ]
       };
 
-      */
 
 
 
+      /*
       //Вариант данных для генерации формы № 2. - всякие "плохие" варианты определения формы
       var formProperties = {
         items:
@@ -439,22 +439,64 @@ qx.Class.define("formgenerator.Application",
             {
               //селект с лишним свойством bambambam, оно ни на что не влияет, и с нормальным свойством data
               //value указан null => будет проигнорирован
-              element: {type: "select", data: [0, 1, 2, 3, 4, 5], bambambam: 123, value: null},
+              //!!! с null и undefined в свойстве data поступаем просто - удаляем их из массива
+              element: {type: "select", data: [null, 0, undefined, 1, 2, 3, 4, 5], bambambam: 123, value: null},
               label: {name: "Select1", position: "left"}//позиция и так по умолчанию left, здесь просто подтвердили это
             },
             {
               //селект с лишним свойством bambambam, оно ни на что не влияет, и с нормальным свойством data
-              element: {type: "select", data: [0, 1, 3, 4, 5]},
+              //функцию в строку преобразит, null и undefined срежет
+              element: {type: "select", data: [0, 1, 3, 4, 5, function() {}, undefined, null]},
               label: {name: "Select2", position: "left"}//позиция и так по умолчанию left, здесь просто подтвердили это
+            },
+            {
+              //singlelist неправильное свойство data
+              element: {type: "singlelist", data: [null, undefined, null, null]},
+              label:   {name: "wrong list1"}
+            },
+            {
+              //***************************************
+              //***************************************
+              //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+              //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+              //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+              //Это вообще жуткий single list, но он будет создан
+              //Значения, которые он может принимать:
+
+              //one
+              //two
+              //3
+              //4
+              //fiivvve
+              //45
+              //function() {alert("dsad")}
+              //i go go
+              element: {
+              type: "singlelist",
+              data: [
+                {label: "one"},
+                "two",
+                3,
+                null,
+                4,
+                {label: "five", value: "fiivvve"},
+                undefined,
+                45,
+                function() {alert("dsad")},
+                {value: "i go go"}
+              ],
+              value: null
+            },
+            label: "TERRIBLE SINGLELIST"
             }
             ]
           }],
         buttons: [
-          {text: "Save",   callback: function() {alert("You are saving: " + qx.util.Serializer.toJson(this.getModel()));}},
-          {text: "Cancel", callback: function() {alert("Cancel");}}
+          {text: "Save",   callback: function() {console.log("You are saving: " + qx.util.Serializer.toJson(this.getModel()));}},
+          {text: "Cancel", callback: function() {console.log("Cancel");}}
         ]
       };
-
+      */
       var formGenerator = new formgenerator.FormGenerator(formProperties);
       this.getRoot().add(formGenerator, {top: 10, left:10});
 
