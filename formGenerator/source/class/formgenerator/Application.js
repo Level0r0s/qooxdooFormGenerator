@@ -137,6 +137,8 @@ qx.Class.define("formgenerator.Application",
             callback - ф-ция обработчик кнопки
       */
 
+
+      /*
       //Вариант для генерации формы № 1
       var formProperties = {
         widget: {
@@ -246,7 +248,7 @@ qx.Class.define("formgenerator.Application",
             name: "Fourth column",
             elements: [
               {
-                element: {type: "select", propertyName: "selectGender", data: [{label: "--Select--", value: "--Select--"},"Male", {label: "Female", value: "Female"}, {label: "Unknown", value: "Unknown"}]/*data: ["--Select--","Male", "Female", "Unknown"]*/, value: "Male", validate: {
+                element: {type: "select", propertyName: "selectGender", data: [{label: "--Select--", value: "--Select--"},"Male", {label: "Female", value: "Female"}, {label: "Unknown", value: "Unknown"}], value: "Male", validate: {
                   funct: function(select) {
                     if (select.getSelection()[0].getModel() == "--Select--") {
                       this.addInvalidMessage("Gender Select: Please select another value (not --Select--)");
@@ -371,87 +373,87 @@ qx.Class.define("formgenerator.Application",
         ]
       };
 
+      */
 
 
 
-
-
-
-      /*
-      //Вариант данных для генерации формы № 2.
-      //массив для single selection list
-      var listData = [];
-      for (var i = 0; i < 25; i++) {
-        listData.push("Item No " + i);
-      }
-
+      //Вариант данных для генерации формы № 2. - всякие "плохие" варианты определения формы
       var formProperties = {
         items:
           [
             {
+              //нет name => не будет названия у колонки
               elements:
               [{
-                element: {type: "textfield", propertyName: "property1"}//т.к. нет Label свойство для связи с моделью обязательно нужно указывать
+                //Нет label, свойство для связи с моделью обязательно нужно указывать, иначе элемент не будет создан
+                element: {type: "textfield", propertyName: "property1", value: 0}
+              },  {
+                //свойство модели рассчитано на основе label - будет LastName, плохое начальное значение, будет проигнорированно, будет присвоен null
+                element: {type: "textfield", value: {}},
+                label:   {name: "Last Name", position: "top"}
               }, {
-                element: {type: "radiobuttongroup", data: ["Male", "Female"]},//нормально определенный элемент, свойство модели - gender
-                label:   {name: "Gender", position: "left"}
-              }, {
+                //"плохо" определенный label, но создастся, своство модели будет - Country
                 element: {type: "textfield"},
-                label:   {name: "Last Name", position: "top"}//свойство модели - будет LastName
+                label:   "Country"
               }, {
+                //label с options, свойство модели - City (теги и пробелы обрезаются)
                 element: {type: "textfield"},
-                label:   "Country"//"плохо" определенный label, своство модели будет - Country
+                label:   {name: "<b>City</b>", options: {textColor: "red", rich: true}}
               }, {
+                //элемент с неизвестным типом, не создастся
+                element: {type: "abracadabra"},
+                label:   {name: "simple label"}
+              }, {
+                //т.к. неправильно определен label, и нет свойства propertyName - мы не можем определить свойство модели => элемент создан не будет
                 element: {type: "textfield"},
-                label:   {name: "<b>City</b>", options: {textColor: "red", rich: true}}//label с options, свойство модели - City (теги и пробелы обрезаются)
-              }, {
-                element: {type: "abracadabra"},//элемент с неизвестным типом, не создастся
-                label:   {name: "simple label"}//свойство модели - simplelabel
-              }, {
-                element: {type: "textfield"},//т.к. неправильно определен label, и нет свойства propertyName - мы не можем определить свойство модели => элемент создан не будет
                 label:   {name111: "fff"}//неправильный label, с непонятным свойством
               }, {
-                element: {type: "radiobuttongroup", data: {}},//радиогруппа с неправильным свойством data не отобразится
+                //радиогруппа с неправильным свойством data не отобразится
+                element: {type: "radiobuttongroup", data: {}},
                 label:   "wrong radiogroup"
               }, {
+                //здесь и textfield и lastlabel "плохо определены", но все равно будут созданы, т.к. мы можем определить имя свойства на основе label
                 element: "textfield",
                 label:   "lastLabel"
               }, {
-                element: "textfield"//нет label и не указано свойство propertyName => не получается создать элемент
+                //нет label и не указано свойство propertyName => не получается создать элемент
+                element: "textfield"
               }, {
-                label: "sync_master"
+                //пустой label
+                label: "Bla bla bla"
               }]
           },
           {
             name: "Second column",
             elements:
             [{
+              //здесь все ок, хотя определение "плохое"
               element: "textfield",
               label:   "Additional information"
             }, {
-              element: "textarea",
-              label:   "Bio"
-            }, {
+              //ВНИМАНИЕ !!!!!!!  => здесь так как свойство lastLabel уже есть в модели, элемент создан не будет!!!!!!!!!
+              //будет создан только label
               element: "textfield",
-              label:   "lastLabel"//перезапишется property модели
-            }]
+              label:   "lastLabel"
+            },
+            {
+              //селект с лишним свойством bambambam, оно ни на что не влияет, и с нормальным свойством data
+              //value указан null => будет проигнорирован
+              element: {type: "select", data: [0, 1, 2, 3, 4, 5], bambambam: 123, value: null},
+              label: {name: "Select1", position: "left"}//позиция и так по умолчанию left, здесь просто подтвердили это
+            },
+            {
+              //селект с лишним свойством bambambam, оно ни на что не влияет, и с нормальным свойством data
+              element: {type: "select", data: [0, 1, 3, 4, 5]},
+              label: {name: "Select2", position: "left"}//позиция и так по умолчанию left, здесь просто подтвердили это
+            }
+            ]
           }],
         buttons: [
-          {text: "Save",   callback: function() {alert("You are saving: " + qx.util.Serializer.toJson(this._model));}},
+          {text: "Save",   callback: function() {alert("You are saving: " + qx.util.Serializer.toJson(this.getModel()));}},
           {text: "Cancel", callback: function() {alert("Cancel");}}
         ]
       };
-      */
-
-
-
-
-
-
-
-
-
-
 
       var formGenerator = new formgenerator.FormGenerator(formProperties);
       this.getRoot().add(formGenerator, {top: 10, left:10});
